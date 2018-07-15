@@ -39,8 +39,24 @@ public class SqlRunner {
 
   public static final int NO_GENERATED_KEY = Integer.MIN_VALUE + 1001;
 
+  /**
+   * 数据库连接
+   */
   private final Connection connection;
+
+  /**
+   * 类型转换工厂
+   */
   private final TypeHandlerRegistry typeHandlerRegistry;
+
+  /**
+   * <P>主键自动增长策略</P>
+   * <P>
+   *   [mybatis 中哪些数据库支持 useGeneratedKeys="true"](https://blog.csdn.net/sinat_30474567/article/details/75221516)
+   *   [深入浅出mybatis之useGeneratedKeys参数用法](https://www.cnblogs.com/nuccch/p/9069644.html)
+   * </P>
+   *
+   */
   private boolean useGeneratedKeySupport;
 
   public SqlRunner(Connection connection) {
@@ -52,13 +68,14 @@ public class SqlRunner {
     this.useGeneratedKeySupport = useGeneratedKeySupport;
   }
 
-  /*
+  /**
+   * 执行返回一行的SELECT语句
    * Executes a SELECT statement that returns one row.
    *
-   * @param sql  The SQL
-   * @param args The arguments to be set on the statement.
-   * @return The row expected.
-   * @throws SQLException If less or more than one row is returned
+   * @param sql  The SQL 需要执行的SQL的语句
+   * @param args The arguments to be set on the statement. 要在声明中设置的参数
+   * @return The row expected.期待的数据的信息
+   * @throws SQLException If less or more than one row is returned 如果返回少于或多于一行 返回异常信息
    */
   public Map<String, Object> selectOne(String sql, Object... args) throws SQLException {
     List<Map<String, Object>> results = selectAll(sql, args);
@@ -68,7 +85,7 @@ public class SqlRunner {
     return results.get(0);
   }
 
-  /*
+  /**
    * Executes a SELECT statement that returns multiple rows.
    *
    * @param sql  The SQL
@@ -79,8 +96,13 @@ public class SqlRunner {
   public List<Map<String, Object>> selectAll(String sql, Object... args) throws SQLException {
     PreparedStatement ps = connection.prepareStatement(sql);
     try {
+      //设置预处理参数值
       setParameters(ps, args);
+
+      //获取返回的结果
       ResultSet rs = ps.executeQuery();
+
+      //处理转换结果
       return getResults(rs);
     } finally {
       try {
@@ -199,6 +221,15 @@ public class SqlRunner {
     }
   }
 
+  /**
+   * <P>Null 是Mybatis 中自己定义的几种常见的类型转换枚举信息</P>
+   * 1、首先看看是否为默认的枚举信息
+   * 2、不是的话看看是否为自定义的类型转换TypeHandler 处理器
+   * 3、如果都没有那就异常处理啦，通过调用类型转换函数进行设置SQL预处理的参数的类型的值
+   * @param ps 这个底层SQL，防止SQL注入
+   * @param args  需要设置在SQL中的每一个数据的信息
+   * @throws SQLException
+   */
   private void setParameters(PreparedStatement ps, Object... args) throws SQLException {
     for (int i = 0, n = args.length; i < n; i++) {
       if (args[i] == null) {
@@ -216,6 +247,12 @@ public class SqlRunner {
     }
   }
 
+  /**
+   * <p>[利用JDBC ResultSetMetaData 将数据反射到实体类中](https://blog.csdn.net/u010018421/article/details/53435728)</p>
+   * @param rs
+   * @return
+   * @throws SQLException
+   */
   private List<Map<String, Object>> getResults(ResultSet rs) throws SQLException {
     try {
       List<Map<String, Object>> list = new ArrayList<>();
@@ -223,8 +260,10 @@ public class SqlRunner {
       List<TypeHandler<?>> typeHandlers = new ArrayList<>();
       ResultSetMetaData rsmd = rs.getMetaData();
       for (int i = 0, n = rsmd.getColumnCount(); i < n; i++) {
+        //获取数据库中 as信息字段名称
         columns.add(rsmd.getColumnLabel(i + 1));
         try {
+          //rsmd.getColumnClassName 获取到当前类类型的全限定Java类型名称 java.lang.String
           Class<?> type = Resources.classForName(rsmd.getColumnClassName(i + 1));
           TypeHandler<?> typeHandler = typeHandlerRegistry.getTypeHandler(type);
           if (typeHandler == null) {
@@ -240,6 +279,8 @@ public class SqlRunner {
         for (int i = 0, n = columns.size(); i < n; i++) {
           String name = columns.get(i);
           TypeHandler<?> handler = typeHandlers.get(i);
+
+          //将字段的名称，还有结果放置在map中处理
           row.put(name.toUpperCase(Locale.ENGLISH), handler.getResult(rs, name));
         }
         list.add(row);
