@@ -22,6 +22,9 @@ import java.util.List;
 import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
+ * [MyBatis（3.4.2）的Cache机制完全解析](https://blog.csdn.net/realskyzou/article/details/54137051)
+ *
+ * 比较顺序：hashCode–>checksum–>count–>updateList，只要有一个不等则说明不是相同的Key。
  * @author Clinton Begin
  */
 public class CacheKey implements Cloneable, Serializable {
@@ -30,13 +33,22 @@ public class CacheKey implements Cloneable, Serializable {
 
   public static final CacheKey NULL_CACHE_KEY = new NullCacheKey();
 
+  /**
+   * 默认的倍增器
+   */
   private static final int DEFAULT_MULTIPLYER = 37;
+
+  /**
+   * 默认的HashCode
+   */
   private static final int DEFAULT_HASHCODE = 17;
 
   private final int multiplier;
   private int hashcode;
   private long checksum;
   private int count;
+
+  //Sonarlint将此标记为需要标记为瞬态。, 如果内容不可序列化，则为true，但这并非总是如此，因此不应标记为瞬态
   // 8/21/2017 - Sonarlint flags this as needing to be marked transient.  While true if content is not serializable, this is not always true and thus should not be marked transient.
   private List<Object> updateList;
 

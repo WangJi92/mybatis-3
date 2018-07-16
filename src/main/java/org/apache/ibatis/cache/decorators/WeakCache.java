@@ -24,6 +24,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.ibatis.cache.Cache;
 
 /**
+ *  [Java四种引用包括强引用，软引用，弱引用，虚引用。](https://www.cnblogs.com/yw-ah/p/5830458.html)
+ * 弱引用缓存装饰器,感谢Heinz Kabutz博士的指导
  * Weak Reference cache decorator.
  * Thanks to Dr. Heinz Kabutz for his guidance here.
  * 

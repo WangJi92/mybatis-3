@@ -42,6 +42,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 public interface Cache {
 
   /**
+   * 此缓存的标识符
    * @return The identifier of this cache
    */
   String getId();
@@ -59,6 +60,10 @@ public interface Cache {
   Object getObject(Object key);
 
   /**
+   * 从3.3.0开始，此方法仅在回滚期间调用，以用于缓存中缺少的任何先前值。
+   * 这允许任何阻塞缓存释放之前可能已经放 key的数据信息。
+   * 阻塞高速缓存在值为null时置位锁定，并在值再次返回时释放它。
+   * 这样，其他线程将等待值可用而不是命中数据库
    * As of 3.3.0 this method is only called during a rollback 
    * for any previous value that was missing in the cache.
    * This lets any blocking cache to release the lock that 
@@ -75,20 +80,24 @@ public interface Cache {
   Object removeObject(Object key);
 
   /**
+   * 清除此缓存实例
    * Clears this cache instance
    */  
   void clear();
 
   /**
+   * 可选的。, 核心不会调用此方法
    * Optional. This method is not called by the core.
    * 
    * @return The number of elements stored in the cache (not its capacity).
    */
   int getSize();
   
-  /** 
+  /**
+   * 可选的。, 从3.2.6开始，核心不再调用此方法
    * Optional. As of 3.2.6 this method is no longer called by the core.
-   *  
+   *
+   *  缓存所需的任何锁定必须由缓存提供程序在内部提供
    * Any locking needed by the cache must be provided internally by the cache provider.
    * 
    * @return A ReadWriteLock 

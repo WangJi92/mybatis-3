@@ -22,13 +22,21 @@ import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.ibatis.cache.Cache;
 
 /**
+ *[LRU算法四种实现方式介绍](https://blog.csdn.net/elricboa/article/details/78847305)
  * Lru (least recently used) cache decorator
  *
  * @author Clinton Begin
  */
 public class LruCache implements Cache {
 
+  /**
+   * 代理缓存数据心理学
+   */
   private final Cache delegate;
+
+  /**
+   * 缓存数据的key的信息，方便查找当前key是否存在当前的cache中，这里不是线程安全的哦！需要Cache保证
+   */
   private Map<Object, Object> keyMap;
   private Object eldestKey;
 
@@ -51,6 +59,12 @@ public class LruCache implements Cache {
     keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
       private static final long serialVersionUID = 4267176411845948333L;
 
+      /**
+       * 通过覆盖这个方法，加入一定的条件，满足条件返回true。当put进新的值方法返回true时，便移除该map中最老的键和值
+       * [LinkedHashMap的removeEldestEntry方法](https://blog.csdn.net/wangshione/article/details/6700985)
+       * @param eldest
+       * @return
+       */
       @Override
       protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
         boolean tooBig = size() > size;
@@ -90,6 +104,10 @@ public class LruCache implements Cache {
     return null;
   }
 
+  /**
+   * 回收真正Cache中的数据
+   * @param key
+   */
   private void cycleKeyList(Object key) {
     keyMap.put(key, key);
     if (eldestKey != null) {

@@ -22,13 +22,20 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
+ * 缓存命中率统计处理
  * @author Clinton Begin
  */
 public class LoggingCache implements Cache {
 
   private final Log log;
   private final Cache delegate;
+  /**
+   * 请求数据量
+   */
   protected int requests = 0;
+  /**
+   * 命中数量
+   */
   protected int hits = 0;
 
   public LoggingCache(Cache delegate) {
@@ -89,6 +96,10 @@ public class LoggingCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 计算命中率，做一个简单的数量的统计处理
+   * @return
+   */
   private double getHitRatio() {
     return (double) hits / (double) requests;
   }

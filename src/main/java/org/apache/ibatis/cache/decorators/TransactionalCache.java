@@ -26,8 +26,12 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
+ * TODO 没有看懂
+ * 第二级缓存事务缓冲区
  * The 2nd level cache transactional buffer.
- * 
+ *
+ * 此类包含在会话期间要添加到二级缓存的所有缓存条目,调用commit时会将条目发送到缓存，如果回滚会话，则会将条目丢弃.
+ * 已添加Blocking cache 支持。, 因此，任何返回缓存未命中的get（）都将跟随put()，因此可以释放与该键关联的任何锁。
  * This class holds all cache entries that are to be added to the 2nd level cache during a Session.
  * Entries are sent to the cache when commit is called or discarded if the Session is rolled back. 
  * Blocking cache support has been added. Therefore any get() that returns a cache miss 

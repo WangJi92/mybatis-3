@@ -20,12 +20,24 @@ import java.util.concurrent.locks.ReadWriteLock;
 import org.apache.ibatis.cache.Cache;
 
 /**
+ * 定时清理缓存（get、put等等定期的清理缓存中的数据信息）
  * @author Clinton Begin
  */
 public class ScheduledCache implements Cache {
 
+  /**
+   * 代理缓存对象
+   */
   private final Cache delegate;
+
+  /**
+   * 缓存对象清理的周期
+   */
   protected long clearInterval;
+
+  /**
+   * 上一次清理的时间
+   */
   protected long lastClear;
 
   public ScheduledCache(Cache delegate) {
@@ -87,6 +99,10 @@ public class ScheduledCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 全量的周期性清除缓存数据信息
+   * @return
+   */
   private boolean clearWhenStale() {
     if (System.currentTimeMillis() - lastClear > clearInterval) {
       clear();

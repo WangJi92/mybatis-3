@@ -25,8 +25,12 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheException;
 
 /**
+ * 这个类实现很好玩，不是很懂这个思路[Mybatis缓存模块（一）BlockingCache ](https://my.oschina.net/u/3218528/blog/1614092)
+ * 简单的阻止装饰
  * Simple blocking decorator 
- * 
+ *
+ * 简单而低效的EhCache版BlockingCache装饰器。当在缓存中找不到元素时，它会设置对缓存键的锁定，这样，其他线程将等待，
+ * 直到填充此元素而不是命中数据库
  * Simple and inefficient version of EhCache's BlockingCache decorator.
  * It sets a lock over a cache key when the element is not found in cache.
  * This way, other threads will wait until this element is filled instead of hitting the database.
@@ -36,6 +40,9 @@ import org.apache.ibatis.cache.CacheException;
  */
 public class BlockingCache implements Cache {
 
+  /**
+   * 一直等待？ <0 一直等待锁
+   */
   private long timeout;
   private final Cache delegate;
   private final ConcurrentHashMap<Object, ReentrantLock> locks;
@@ -64,6 +71,11 @@ public class BlockingCache implements Cache {
     }
   }
 
+  /**
+   * 会一直等待获取某个键数据信息的锁，
+   * @param key The key
+   * @return
+   */
   @Override
   public Object getObject(Object key) {
     acquireLock(key);
@@ -90,7 +102,12 @@ public class BlockingCache implements Cache {
   public ReadWriteLock getReadWriteLock() {
     return null;
   }
-  
+
+  /**
+   * 根据Object创建一个锁
+   * @param key
+   * @return
+   */
   private ReentrantLock getLockForKey(Object key) {
     ReentrantLock lock = new ReentrantLock();
     ReentrantLock previous = locks.putIfAbsent(key, lock);

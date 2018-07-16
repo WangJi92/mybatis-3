@@ -30,6 +30,7 @@ import org.apache.ibatis.cache.CacheException;
 import org.apache.ibatis.io.Resources;
 
 /**
+ * 可序列化缓存数据信息，将对象Object转换保存为序列化后的二进制的数据值
  * @author Clinton Begin
  */
 public class SerializedCache implements Cache {
@@ -90,6 +91,11 @@ public class SerializedCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 序列化Object数据信息
+   * @param value
+   * @return
+   */
   private byte[] serialize(Serializable value) {
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
          ObjectOutputStream oos = new ObjectOutputStream(bos)) {
@@ -101,6 +107,11 @@ public class SerializedCache implements Cache {
     }
   }
 
+  /**
+   * 反序列化数据信息
+   * @param value
+   * @return
+   */
   private Serializable deserialize(byte[] value) {
     Serializable result;
     try (ByteArrayInputStream bis = new ByteArrayInputStream(value);
@@ -112,6 +123,9 @@ public class SerializedCache implements Cache {
     return result;
   }
 
+  /**
+   * 自定义虚拟化数据信息，这里仅仅是通过自己查找Class数据信息
+   */
   public static class CustomObjectInputStream extends ObjectInputStream {
 
     public CustomObjectInputStream(InputStream in) throws IOException {
