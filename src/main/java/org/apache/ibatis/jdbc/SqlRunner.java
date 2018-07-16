@@ -15,22 +15,12 @@
  */
 package org.apache.ibatis.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+
+import java.sql.*;
+import java.util.*;
 
 /**
  * @author Clinton Begin
@@ -113,16 +103,22 @@ public class SqlRunner {
     }
   }
 
-  /*
+  /**
+   * <p>
+   *  [通过getGeneratedKeys()获取主键](https://blog.csdn.net/qq_39147516/article/details/78439780)
+   *  [java getGeneratedKeys(获取自动递增主键)一个小问题](https://www.cnblogs.com/wumian/articles/2012-10-20-1204.html)
+   * </p>
    * Executes an INSERT statement.
    *
    * @param sql  The SQL
    * @param args The arguments to be set on the statement.
-   * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched.
+   * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched. 影响的行数或批处理结果,如果批处理语句
    * @throws SQLException If statement preparation or execution fails
    */
   public int insert(String sql, Object... args) throws SQLException {
     PreparedStatement ps;
+
+    //自动生成主键策略,返回自动增加的主键的信息
     if (useGeneratedKeySupport) {
       ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
     } else {
@@ -159,7 +155,8 @@ public class SqlRunner {
     }
   }
 
-  /*
+  /**
+   * 更新参数一样的，设置参数也是一样的哦
    * Executes an UPDATE statement.
    *
    * @param sql  The SQL
@@ -181,20 +178,20 @@ public class SqlRunner {
     }
   }
 
-  /*
+  /**
    * Executes a DELETE statement.
    *
-   * @param sql  The SQL
-   * @param args The arguments to be set on the statement.
-   * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched.
+   * @param sql  The SQL  SQL参数
+   * @param args The arguments to be set on the statement. 设置的参数声明
+   * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched. 影响的行数或批处理结果,如果批处理语句
    * @throws SQLException If statement preparation or execution fails
    */
   public int delete(String sql, Object... args) throws SQLException {
     return update(sql, args);
   }
 
-  /*
-   * Executes any string as a JDBC Statement.
+  /**
+   * Executes any string as a JDBC Statement. 执行任何字符串作为JDBC语句。
    * Good for DDL
    *
    * @param sql The SQL
