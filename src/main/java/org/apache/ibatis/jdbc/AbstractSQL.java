@@ -33,6 +33,10 @@ public abstract class AbstractSQL<T> {
 
   private final SQLStatement sql = new SQLStatement();
 
+  /**
+   * 返回当前泛型参数对象信息
+   * @return
+   */
   public abstract T getSelf();
 
   public T UPDATE(String table) {
@@ -41,6 +45,12 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * <P>[mybatis动态SQL中的set标签的使用](https://www.cnblogs.com/qiankun-site/p/5758383.html)</P>
+   * 这里就是处理Set
+   * @param sets
+   * @return
+   */
   public T SET(String sets) {
     sql().sets.add(sets);
     return getSelf();
@@ -54,12 +64,23 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * 插入
+   * @param tableName
+   * @return
+   */
   public T INSERT_INTO(String tableName) {
     sql().statementType = SQLStatement.StatementType.INSERT;
     sql().tables.add(tableName);
     return getSelf();
   }
 
+  /**
+   * 插入处理 键 值信息
+   * @param columns
+   * @param values
+   * @return
+   */
   public T VALUES(String columns, String values) {
     sql().columns.add(columns);
     sql().values.add(values);
@@ -67,6 +88,7 @@ public abstract class AbstractSQL<T> {
   }
 
   /**
+   * 批量的列数据
    * @since 3.4.2
    */
   public T INTO_COLUMNS(String... columns) {
@@ -75,6 +97,7 @@ public abstract class AbstractSQL<T> {
   }
 
   /**
+   * 批量的列数据值
    * @since 3.4.2
    */
   public T INTO_VALUES(String... values) {
@@ -82,6 +105,11 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * 选择数据信息
+   * @param columns
+   * @return
+   */
   public T SELECT(String columns) {
     sql().statementType = SQLStatement.StatementType.SELECT;
     sql().select.add(columns);
@@ -89,6 +117,7 @@ public abstract class AbstractSQL<T> {
   }
 
   /**
+   * 选择数据信息
    * @since 3.4.2
    */
   public T SELECT(String... columns) {
@@ -97,6 +126,11 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * 选择唯一的DISTINCT
+   * @param columns
+   * @return
+   */
   public T SELECT_DISTINCT(String columns) {
     sql().distinct = true;
     SELECT(columns);
@@ -112,12 +146,22 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * 删除
+   * @param table
+   * @return
+   */
   public T DELETE_FROM(String table) {
     sql().statementType = SQLStatement.StatementType.DELETE;
     sql().tables.add(table);
     return getSelf();
   }
 
+  /**
+   *
+   * @param table
+   * @return
+   */
   public T FROM(String table) {
     sql().tables.add(table);
     return getSelf();
@@ -131,6 +175,11 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * 链接数据
+   * @param join
+   * @return
+   */
   public T JOIN(String join) {
     sql().join.add(join);
     return getSelf();
@@ -196,6 +245,11 @@ public abstract class AbstractSQL<T> {
     return getSelf();
   }
 
+  /**
+   * 添加where处理
+   * @param conditions
+   * @return
+   */
   public T WHERE(String conditions) {
     sql().where.add(conditions);
     sql().lastList = sql().where;
@@ -307,6 +361,9 @@ public abstract class AbstractSQL<T> {
 
   private static class SQLStatement {
 
+    /**
+     * 执行SQL的类型 更新、删除、选择、还是插入
+     */
     public enum StatementType {
       DELETE, INSERT, SELECT, UPDATE
     }
