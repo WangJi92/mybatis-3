@@ -15,16 +15,44 @@
  */
 package org.apache.ibatis.mapping;
 
-import javax.sql.DataSource;
-
 import org.apache.ibatis.transaction.TransactionFactory;
 
+import javax.sql.DataSource;
+
 /**
+ * 环境配置属性
+ * <code>
+    <environments default="development">
+      <environment id="development">
+        <transactionManager type="JDBC">
+        <property name="..." value="..."/>
+        </transactionManager>
+        <dataSource type="POOLED">
+        <property name="driver" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        </dataSource>
+      </environment>
+    </environments>
+ * </code>
+ *
+ *<P>[MyBatis配置详解](https://blog.csdn.net/bear_wr/article/details/52401881)</P>
  * @author Clinton Begin
  */
 public final class Environment {
+  /**
+   * 环境id
+   */
   private final String id;
+  /**
+   * 事务处理工厂
+   */
   private final TransactionFactory transactionFactory;
+
+  /**
+   * 数据源信息
+   */
   private final DataSource dataSource;
 
   public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
@@ -42,6 +70,9 @@ public final class Environment {
     this.dataSource = dataSource;
   }
 
+  /**
+   * Builder 模式处理的活灵活现的
+   */
   public static class Builder {
       private String id;
       private TransactionFactory transactionFactory;
