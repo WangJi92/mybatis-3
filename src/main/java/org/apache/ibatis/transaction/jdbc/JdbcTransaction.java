@@ -15,15 +15,15 @@
  */
 package org.apache.ibatis.transaction.jdbc;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionException;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * {@link Transaction} that makes use of the JDBC commit and rollback facilities directly.
@@ -34,14 +34,29 @@ import org.apache.ibatis.transaction.TransactionException;
  * @author Clinton Begin
  *
  * @see JdbcTransactionFactory
+ *
+ * [Mybatis中的事务管理器详述](https://blog.csdn.net/majinggogogo/article/details/72026693)
+ * [MyBatis集合Spring（四）之使用Spring处理事务](https://blog.csdn.net/owen_william/article/details/51815605)
  */
 public class JdbcTransaction implements Transaction {
 
   private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
+  /**
+   * 数据库链接
+   */
   protected Connection connection;
+  /**
+   * 数据源
+   */
   protected DataSource dataSource;
+  /**
+   * 事务隔离级别
+   */
   protected TransactionIsolationLevel level;
+  /**
+   * 自动提交事务
+   */
   protected boolean autoCommit;
 
   public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
@@ -57,6 +72,7 @@ public class JdbcTransaction implements Transaction {
   @Override
   public Connection getConnection() throws SQLException {
     if (connection == null) {
+      //创建一个连接，不存在就手动去构造一个数据连接请求
       openConnection();
     }
     return connection;
@@ -64,6 +80,7 @@ public class JdbcTransaction implements Transaction {
 
   @Override
   public void commit() throws SQLException {
+    //自动提交还是手动提交哦
     if (connection != null && !connection.getAutoCommit()) {
       if (log.isDebugEnabled()) {
         log.debug("Committing JDBC Connection [" + connection + "]");
@@ -74,6 +91,7 @@ public class JdbcTransaction implements Transaction {
 
   @Override
   public void rollback() throws SQLException {
+    //回滚操作
     if (connection != null && !connection.getAutoCommit()) {
       if (log.isDebugEnabled()) {
         log.debug("Rolling back JDBC Connection [" + connection + "]");
@@ -93,6 +111,10 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  /**
+   * 设置是否自动提交事务
+   * @param desiredAutoCommit
+   */
   protected void setDesiredAutoCommit(boolean desiredAutoCommit) {
     try {
       if (connection.getAutoCommit() != desiredAutoCommit) {
@@ -113,11 +135,11 @@ public class JdbcTransaction implements Transaction {
   protected void resetAutoCommit() {
     try {
       if (!connection.getAutoCommit()) {
-        // MyBatis does not call commit/rollback on a connection if just selects were performed.
-        // Some databases start transactions with select statements
-        // and they mandate a commit/rollback before closing the connection.
-        // A workaround is setting the autocommit to true before closing the connection.
-        // Sybase throws an exception here.
+        // MyBatis does not call commit/rollback on a connection if just selects were performed.  not call commit/rollback on a connection 如果只是执行选择操作
+        // Some databases start transactions with select statements 有些数据库与select语句开始交易
+        // and they mandate a commit/rollback before closing the connection. 他们强制关闭连接之前提交/回滚
+        // A workaround is setting the autocommit to true before closing the connection.一个解决方法是设置自动提交关闭连接之前为true
+        // Sybase throws an exception here. Sybase抛出一个异常
         if (log.isDebugEnabled()) {
           log.debug("Resetting autocommit to true on JDBC Connection [" + connection + "]");
         }
@@ -131,12 +153,17 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  /**
+   * 创建JDBC 数据连接
+   * @throws SQLException
+   */
   protected void openConnection() throws SQLException {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
     connection = dataSource.getConnection();
     if (level != null) {
+      //创建事物隔离级别
       connection.setTransactionIsolation(level.getLevel());
     }
     setDesiredAutoCommit(autoCommit);

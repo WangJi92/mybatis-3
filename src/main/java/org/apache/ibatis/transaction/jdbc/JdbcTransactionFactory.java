@@ -15,16 +15,16 @@
  */
 package org.apache.ibatis.transaction.jdbc;
 
-import java.sql.Connection;
-import java.util.Properties;
-
-import javax.sql.DataSource;
-
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.util.Properties;
+
 /**
+ * 创建JDBC事务 连接工程哦~统一SPI接口方便其他的进行集成处理
  * Creates {@link JdbcTransaction} instances.
  *
  * @author Clinton Begin

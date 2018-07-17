@@ -15,23 +15,29 @@
  */
 package org.apache.ibatis.transaction.managed;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
+ *
  * {@link Transaction} that lets the container manage the full lifecycle of the transaction.
  * Delays connection retrieval until getConnection() is called.
  * Ignores all commit or rollback requests.
  * By default, it closes the connection but can be configured not to do it.
  *
  * @author Clinton Begin
- *
+ * 忽略所有提交或回滚的请求
+ * 默认情况下,它将关闭连接但不可以配置。
+ * <P>
+ *  [Mybatis深入之事务管理](https://blog.csdn.net/crave_shy/article/details/46595391)
+ *  type为”managed”时、使用ManagedTransaction管理事务（也就是交由外部容器管理)
+ * </P>
  * @see ManagedTransactionFactory
  */
 public class ManagedTransaction implements Transaction {
@@ -62,6 +68,10 @@ public class ManagedTransaction implements Transaction {
     return this.connection;
   }
 
+  /**
+   * 这里和JDBC的处理不同之处就是在于 这里不处理事务的提交以及回滚的操作，交给外部去维护这些信息的处理
+   * @throws SQLException
+   */
   @Override
   public void commit() throws SQLException {
     // Does nothing
@@ -82,6 +92,10 @@ public class ManagedTransaction implements Transaction {
     }
   }
 
+  /**
+   * 穿件JDBC的连接
+   * @throws SQLException
+   */
   protected void openConnection() throws SQLException {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
