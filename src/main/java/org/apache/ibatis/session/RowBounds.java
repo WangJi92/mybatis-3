@@ -16,13 +16,19 @@
 package org.apache.ibatis.session;
 
 /**
+ * 用来处理限制分页查询数据信息
+ * [Mybatis逻辑分页原理解析RowBounds](https://blog.csdn.net/qq924862077/article/details/52611848)
  * @author Clinton Begin
  */
 public class RowBounds {
 
+  /**
+   * 默认没有上线的限制
+   */
   public static final int NO_ROW_OFFSET = 0;
   public static final int NO_ROW_LIMIT = Integer.MAX_VALUE;
   public static final RowBounds DEFAULT = new RowBounds();
+
 
   private final int offset;
   private final int limit;
