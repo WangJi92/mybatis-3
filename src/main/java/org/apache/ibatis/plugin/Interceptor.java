@@ -18,14 +18,32 @@ package org.apache.ibatis.plugin;
 import java.util.Properties;
 
 /**
+ * PluginTest 中有非常详细的表述，自己可以手动的调试查看其中的源码的数据信息
+ * [李红推荐技术大牛博客分析](https://my.oschina.net/zudajun)
  * @author Clinton Begin
  */
 public interface Interceptor {
 
+  /**
+   * 调用实际方法的时候，真正调用进行拦截
+   * @param invocation  封装被调用对象的方法和属性
+   * @return
+   * @throws Throwable
+   */
   Object intercept(Invocation invocation) throws Throwable;
 
+  /**
+   * 对当前target 进行包装，返回比如通过动态代理代理后的对象
+   * @param target
+   * @return
+   */
   Object plugin(Object target);
 
+
+  /**
+   * 设置一些属性？
+   * @param properties
+   */
   void setProperties(Properties properties);
 
 }

@@ -28,6 +28,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Intercepts {
+  /**
+   * 设置需要拦截的方法
+   * @return
+   */
   Signature[] value();
 }
 

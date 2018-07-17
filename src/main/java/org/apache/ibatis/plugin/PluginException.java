@@ -18,6 +18,7 @@ package org.apache.ibatis.plugin;
 import org.apache.ibatis.exceptions.PersistenceException;
 
 /**
+ * 添加拦截过滤链信息错误哦
  * @author Clinton Begin
  */
 public class PluginException extends PersistenceException {

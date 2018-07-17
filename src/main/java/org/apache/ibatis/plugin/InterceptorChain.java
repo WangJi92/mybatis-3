@@ -20,10 +20,14 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 拦截器调用链
  * @author Clinton Begin
  */
 public class InterceptorChain {
 
+  /**
+   * 拦截器链信息
+   */
   private final List<Interceptor> interceptors = new ArrayList<>();
 
   public Object pluginAll(Object target) {
@@ -33,6 +37,10 @@ public class InterceptorChain {
     return target;
   }
 
+  /**
+   * 添加调用链
+   * @param interceptor
+   */
   public void addInterceptor(Interceptor interceptor) {
     interceptors.add(interceptor);
   }
