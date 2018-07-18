@@ -15,50 +15,9 @@
  */
 package org.apache.ibatis.builder.annotation;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-
-import org.apache.ibatis.annotations.Arg;
-import org.apache.ibatis.annotations.CacheNamespace;
-import org.apache.ibatis.annotations.CacheNamespaceRef;
-import org.apache.ibatis.annotations.Case;
-import org.apache.ibatis.annotations.ConstructorArgs;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.DeleteProvider;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.InsertProvider;
-import org.apache.ibatis.annotations.Lang;
-import org.apache.ibatis.annotations.MapKey;
-import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.annotations.Options.FlushCachePolicy;
-import org.apache.ibatis.annotations.Property;
-import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.ResultMap;
-import org.apache.ibatis.annotations.ResultType;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.SelectKey;
-import org.apache.ibatis.annotations.SelectProvider;
-import org.apache.ibatis.annotations.TypeDiscriminator;
-import org.apache.ibatis.annotations.Update;
-import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.binding.MapperMethod.ParamMap;
 import org.apache.ibatis.builder.BuilderException;
@@ -71,15 +30,7 @@ import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.Discriminator;
-import org.apache.ibatis.mapping.FetchType;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ResultFlag;
-import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.mapping.ResultSetType;
-import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.parsing.PropertyParser;
 import org.apache.ibatis.reflection.Jdk;
 import org.apache.ibatis.reflection.TypeParameterResolver;
@@ -91,17 +42,48 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.UnknownTypeHandler;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.*;
+
 /**
+ * <p>mapper注解构建器</p>
+ * <p>
+ *  它的职责很简单，就是解析指定的mapper接口对应的Class对象中，包含的所有mybatis框架中定义的注解，并生成Cache、ResultMap、MappedStatement三种类型对象
+ *  [mybatis核心组件详解——MapperAnnotationBuilder ](https://my.oschina.net/lixin91/blog/625903)
+ *  [mybatis注解详解](https://www.cnblogs.com/ibook360/archive/2012/07/16/2594056.html)
+ * </p>
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public class MapperAnnotationBuilder {
 
+  /**
+   * SQL注释类型 Select Insert Update Delete sql语句保存在注解中
+   */
   private static final Set<Class<? extends Annotation>> SQL_ANNOTATION_TYPES = new HashSet<>();
+
+  /**
+   *  SelectProvider InsertProvider  UpdateProvider DeleteProvider sql语句保存在注解指定的类的指定方法中
+   */
   private static final Set<Class<? extends Annotation>> SQL_PROVIDER_ANNOTATION_TYPES = new HashSet<>();
 
+  /**
+   * 核心配置对象
+   */
   private final Configuration configuration;
+
+  /**
+   * Mapper构建助手，用于组装解析出来的配置，生成Cache、ResultMap、MappedStatement等对象
+   * 并添加到Configuration配置对象中
+   */
   private final MapperBuilderAssistant assistant;
+
+  /**
+   * 要解析的目标mapper接口的Class对象
+   */
   private final Class<?> type;
 
   static {
@@ -123,10 +105,20 @@ public class MapperAnnotationBuilder {
     this.type = type;
   }
 
+  /**
+   * MapperAnnotationBuilder是以Class.toString()方法生成的字符串，作为Class对象的唯一标识的，在解析完Class对象后
+   * ，会调用Configuration.addLoadedResource()方法把这个字符串加入配置对象的内部集合中，以防止重复解析。
+   *
+   * MapperAnnotationBuilder总会优先解析xml配置文件，并且这个xml配置文件必须与Class对象所在的包路径一致，且文件名要与类名一致。在解析完xml配置文件后，才会开始解析Class对象中包含的注解。
+   */
   public void parse() {
+    //是以Class.toString()方法生成的字符串，作为Class对象的唯一标识的
     String resource = type.toString();
     if (!configuration.isResourceLoaded(resource)) {
+      // 看看有没有默认的xml在当前类路径下，且没有被被解析过哦~
       loadXmlResource();
+
+      //当前类Mapper 接口已经加载
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
       parseCache();
@@ -134,7 +126,7 @@ public class MapperAnnotationBuilder {
       Method[] methods = type.getMethods();
       for (Method method : methods) {
         try {
-          // issue #237
+          // issue #237  非桥接方法
           if (!method.isBridge()) {
             parseStatement(method);
           }
@@ -161,11 +153,21 @@ public class MapperAnnotationBuilder {
     }
   }
 
+  /**
+   * XMLMapperBuilder每解析一个xml配置文件，都会将已经解析的{@linkplain Configuration#loadedResources 放置在这里面}，
+   * 并使用xml中使用的"namespace："+namespace（基本上就是dao的全限定名称）具体看这里{@linkplain XMLMapperBuilder#bindMapperForNamespace()}
+   * <code>
+   *     <mapper namespace="xx.xxx.dao.DoorPersonInfoDao">
+   * </code>
+   *
+   * 但是解析Mapper接口的时候，可能会有一种默认的约定就是xml可能会存再 com.mapper.UserMapper 对应 com/mapper/UserMapper.xml
+   */
   private void loadXmlResource() {
-    // Spring may not know the real resource name so we check a flag
-    // to prevent loading again a resource twice
-    // this flag is set at XMLMapperBuilder#bindMapperForNamespace
+    // Spring may not know the real resource name so we check a flag [spring 可能不知道真正的资源名所以我们检查一个标志]
+    // to prevent loading again a resource twice 以防止再次加载资源两次
+    // this flag is set at XMLMapperBuilder#bindMapperForNamespace 这个标志设置 XMLMapperBuilder#bindMapperForNamespace
     if (!configuration.isResourceLoaded("namespace:" + type.getName())) {
+      //如果没有xml数据被加载，看看是否有默认的配置文件存在
       String xmlResource = type.getName().replace('.', '/') + ".xml";
       InputStream inputStream = null;
       try {
@@ -174,12 +176,16 @@ public class MapperAnnotationBuilder {
         // ignore, resource is not required
       }
       if (inputStream != null) {
+        //如果存在就进行解析哦
         XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource, configuration.getSqlFragments(), type.getName());
         xmlParser.parse();
       }
     }
   }
 
+  /**
+   * [深入了解MyBatis二级缓存](https://yq.aliyun.com/articles/11790)
+   */
   private void parseCache() {
     CacheNamespace cacheDomain = type.getAnnotation(CacheNamespace.class);
     if (cacheDomain != null) {
@@ -202,6 +208,9 @@ public class MapperAnnotationBuilder {
     return props;
   }
 
+  /**
+   * 某个cache的引用
+   */
   private void parseCacheRef() {
     CacheNamespaceRef cacheDomainRef = type.getAnnotation(CacheNamespaceRef.class);
     if (cacheDomainRef != null) {
