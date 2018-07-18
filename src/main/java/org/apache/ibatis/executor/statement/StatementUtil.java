@@ -31,9 +31,10 @@ public class StatementUtil {
   }
 
   /**
+   * 应用一个事务超时。
    * Apply a transaction timeout.
    * <p>
-   * Update a query timeout to apply a transaction timeout.
+   * Update a query timeout to apply a transaction timeout. 更新查询超时应用事务超时
    * </p>
    * @param statement a target statement
    * @param queryTimeout a query timeout
