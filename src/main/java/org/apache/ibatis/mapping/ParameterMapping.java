@@ -15,28 +15,65 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.sql.ResultSet;
-
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+import java.sql.ResultSet;
+
 /**
+ * 封装参数映射
  * @author Clinton Begin
  */
 public class ParameterMapping {
 
+  /**
+   * 核心数据
+   */
   private Configuration configuration;
 
+  /**
+   * n. 性质，性能；财产；所有权
+   */
   private String property;
+  /**
+   * 参数类型 输入 输出
+   */
   private ParameterMode mode;
+  /**
+   * Java 类型
+   */
   private Class<?> javaType = Object.class;
+
+  /**
+   * JDBC类型
+   */
   private JdbcType jdbcType;
+
+  /**
+   * 数字量表
+   */
   private Integer numericScale;
+
+  /**
+   * 类型的处理程序
+   */
   private TypeHandler<?> typeHandler;
+
+  /**
+   * resultMap的id信息
+   */
   private String resultMapId;
+
+  /**
+   * jdbc 类型的名称
+   */
   private String jdbcTypeName;
+
+  /**
+   *  表现，表示，表达；表情，脸色，态度，腔调，声调；式，符号；词句，语句，措辞，说法
+   */
   private String expression;
 
   private ParameterMapping() {
@@ -100,7 +137,10 @@ public class ParameterMapping {
     }
 
     public ParameterMapping build() {
+      //解决TypeHandler
       resolveTypeHandler();
+
+      //校验数据处理
       validate();
       return parameterMapping;
     }
