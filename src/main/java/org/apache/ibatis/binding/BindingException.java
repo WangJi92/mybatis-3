@@ -18,6 +18,7 @@ package org.apache.ibatis.binding;
 import org.apache.ibatis.exceptions.PersistenceException;
 
 /**
+ * 绑定数据异常哦
  * @author Clinton Begin
  */
 public class BindingException extends PersistenceException {
