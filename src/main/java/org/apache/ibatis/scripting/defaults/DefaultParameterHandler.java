@@ -15,10 +15,6 @@
  */
 package org.apache.ibatis.scripting.defaults;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.List;
-
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -32,12 +28,22 @@ import org.apache.ibatis.type.TypeException;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
 /**
+ * <P>[Mybatis3.3.x技术内幕（六）：StatementHandler（Box stop here）](https://my.oschina.net/zudajun/blog/668378)
+ *  看起来理解还是有点难度哦
+ * </P>
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class DefaultParameterHandler implements ParameterHandler {
 
+  /**
+   * 参数类型转换专家
+   */
   private final TypeHandlerRegistry typeHandlerRegistry;
 
   private final MappedStatement mappedStatement;
@@ -45,6 +51,12 @@ public class DefaultParameterHandler implements ParameterHandler {
   private final BoundSql boundSql;
   private final Configuration configuration;
 
+  /**
+   *
+   * @param mappedStatement 对应一条执行的SQL语句信息
+   * @param parameterObject  参数
+   * @param boundSql sql语句信息
+   */
   public DefaultParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
     this.mappedStatement = mappedStatement;
     this.configuration = mappedStatement.getConfiguration();
@@ -58,17 +70,31 @@ public class DefaultParameterHandler implements ParameterHandler {
     return parameterObject;
   }
 
+  /**
+   * 这里设置参数属性值 挺麻烦的哦 TODO 最后断点跟踪一下
+   *
+   * 请看方法参数，参数要求是一个PreparedStatement对象，当然可以处理PreparedStatement。然而，为何它还可以处理CallableStatement对象呢？
+   * 原因在这里，请看JDK中有关java.sql.CallableStatement的接口描述。 IN parameter values are set using the set methods inherited from  PreparedStatement
+   * 对于存储过程的IN参数来说，CallableStatement继承自PreparedStatement，传递进来的CallableStatement对象，其实也是PreparedStatement对象
+   * @param ps
+   */
   @Override
   public void setParameters(PreparedStatement ps) {
     ErrorContext.instance().activity("setting parameters").object(mappedStatement.getParameterMap().getId());
+
+    //获取参数哦
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings != null) {
       for (int i = 0; i < parameterMappings.size(); i++) {
         ParameterMapping parameterMapping = parameterMappings.get(i);
+
+        //非输出参数
         if (parameterMapping.getMode() != ParameterMode.OUT) {
           Object value;
+
+          //第一个参数的属性值 TODO 下面参数的处理理解不好懂
           String propertyName = parameterMapping.getProperty();
-          if (boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params
+          if (boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params 问第一个额外的参数
             value = boundSql.getAdditionalParameter(propertyName);
           } else if (parameterObject == null) {
             value = null;
@@ -84,6 +110,7 @@ public class DefaultParameterHandler implements ParameterHandler {
             jdbcType = configuration.getJdbcTypeForNull();
           }
           try {
+            //设置参数的值哦
             typeHandler.setParameter(ps, i + 1, value, jdbcType);
           } catch (TypeException e) {
             throw new TypeException("Could not set parameters for mapping: " + parameterMapping + ". Cause: " + e, e);
