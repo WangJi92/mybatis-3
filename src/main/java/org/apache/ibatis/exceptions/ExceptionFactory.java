@@ -27,6 +27,7 @@ public class ExceptionFactory {
   }
 
   public static RuntimeException wrapException(String message, Exception e) {
+    //使用规范化打印日志信息 ErrorContext.instance().message(message).cause(e).toString()
     return new PersistenceException(ErrorContext.instance().message(message).cause(e).toString(), e);
   }
 
