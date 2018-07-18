@@ -24,6 +24,7 @@ import java.util.Properties;
 /**
  * 创建事物实例
  * Creates {@link Transaction} instances.
+ * [Mybatis3.3.x技术内幕（三）：Mybatis事务管理（将颠覆你心中目前对事务的理解）](https://my.oschina.net/zudajun/blog/666764)
  *
  * @author Clinton Begin
  */
