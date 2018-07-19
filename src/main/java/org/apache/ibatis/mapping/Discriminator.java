@@ -15,12 +15,13 @@
  */
 package org.apache.ibatis.mapping;
 
+import org.apache.ibatis.session.Configuration;
+
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.ibatis.session.Configuration;
-
 /**
+ * [MyBatis级联探讨第二篇——鉴别器（discriminator）](https://blog.csdn.net/ykzhen2015/article/details/51249963)
  * @author Clinton Begin
  */
 public class Discriminator {
