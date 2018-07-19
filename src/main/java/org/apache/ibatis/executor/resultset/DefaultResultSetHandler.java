@@ -70,29 +70,70 @@ import java.util.Set;
  */
 public class DefaultResultSetHandler implements ResultSetHandler {
 
+  /**
+   * vi. 推迟，拖延，延迟；延期：
+   */
   private static final Object DEFERED = new Object();
-
+  /**
+   * 执行器
+   */
   private final Executor executor;
+
+  /**
+   * 核心配置文件
+   */
   private final Configuration configuration;
+
+  /**
+   * 对应一次查询SQl的属性信息
+   */
   private final MappedStatement mappedStatement;
+
+  /**
+   * 分页处理参数
+   */
   private final RowBounds rowBounds;
+
+  /**
+   * 参数处理程序
+   */
   private final ParameterHandler parameterHandler;
+
+  /**
+   * 结果处理？？？
+   */
   private final ResultHandler<?> resultHandler;
+
+  /**
+   * 获取SQL？
+   */
   private final BoundSql boundSql;
+
+  /**
+   * 类型转换仓库
+   */
   private final TypeHandlerRegistry typeHandlerRegistry;
+
+  /**
+   * 核心配置中的
+   */
   private final ObjectFactory objectFactory;
+
+  /**
+   * 核心配置中的反射工厂？
+   */
   private final ReflectorFactory reflectorFactory;
 
-  // nested resultmaps
+  // nested resultmaps 嵌套resultmaps
   private final Map<CacheKey, Object> nestedResultObjects = new HashMap<>();
   private final Map<String, Object> ancestorObjects = new HashMap<>();
   private Object previousRowValue;
 
-  // multiple resultsets
+  // multiple resultsets 多个结果集
   private final Map<String, ResultMapping> nextResultMaps = new HashMap<>();
   private final Map<CacheKey, List<PendingRelation>> pendingRelations = new HashMap<>();
 
-  // Cached Automappings
+  // Cached Automappings 缓存Automappings
   private final Map<String, List<UnMappedColumnAutoMapping>> autoMappingsCache = new HashMap<>();
 
   // temporary marking flag that indicate using constructor mapping (use field to reduce memory usage)
@@ -141,7 +182,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     final MetaObject metaParam = configuration.newMetaObject(parameterObject);
     final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     for (int i = 0; i < parameterMappings.size(); i++) {
+      //循环处理每个参数
       final ParameterMapping parameterMapping = parameterMappings.get(i);
+
+      //判断参数模式
       if (parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT) {
         if (ResultSet.class.equals(parameterMapping.getJavaType())) {
           handleRefCursorOutputParameter((ResultSet) cs.getObject(i + 1), parameterMapping, metaParam);
@@ -186,6 +230,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     int resultSetCount = 0;
     ResultSetWrapper rsw = getFirstResultSet(stmt);
 
+    //返回ResultMap 有几个？一般一个
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
     int resultMapCount = resultMaps.size();
     validateResultMapsCount(rsw, resultMapCount);
@@ -284,6 +329,11 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     nestedResultObjects.clear();
   }
 
+  /**
+   * ResultMap的结果信息 不可能为小于1
+   * @param rsw
+   * @param resultMapCount
+   */
   private void validateResultMapsCount(ResultSetWrapper rsw, int resultMapCount) {
     if (rsw != null && resultMapCount < 1) {
       throw new ExecutorException("A query was run and no Result Maps were found for the Mapped Statement '" + mappedStatement.getId()
@@ -321,6 +371,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   public void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
     if (resultMap.hasNestedResultMaps()) {
+      // 含有嵌套的结果集
       ensureNoRowBounds();
       checkResultHandler();
       handleRowValuesForNestedResultMap(rsw, resultMap, resultHandler, rowBounds, parentMapping);
@@ -329,6 +380,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
+  /**
+   * 查看是否正确的分页参数
+   */
   private void ensureNoRowBounds() {
     if (configuration.isSafeRowBoundsEnabled() && rowBounds != null && (rowBounds.getLimit() < RowBounds.NO_ROW_LIMIT || rowBounds.getOffset() > RowBounds.NO_ROW_OFFSET)) {
       throw new ExecutorException("Mapped Statements with nested result mappings cannot be safely constrained by RowBounds. "
@@ -336,6 +390,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
   }
 
+  /**
+   * what ？？？ TODO  resultHandler
+   */
   protected void checkResultHandler() {
     if (resultHandler != null && configuration.isSafeResultHandlerEnabled() && !mappedStatement.isResultOrdered()) {
       throw new ExecutorException("Mapped Statements with nested result mappings cannot be safely used with a custom ResultHandler. "
@@ -804,7 +861,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   }
 
   //
-  // DISCRIMINATOR
+  // DISCRIMINATOR  处理鉴别器
   //
 
   public ResultMap resolveDiscriminatedResultMap(ResultSet rs, ResultMap resultMap, String columnPrefix) throws SQLException {
