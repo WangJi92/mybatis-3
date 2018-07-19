@@ -47,6 +47,12 @@ public class StaticSqlSource implements SqlSource {
     this(configuration, sql, null);
   }
 
+  /**
+   * 将已经通过 解析完成的 SQL数据进行包装，只含有 ？？ ？？ ？？ 这种类型的数据
+   * @param configuration
+   * @param sql  ？？？ 类型的数据
+   * @param parameterMappings  这些问号对应的参数数据的类型，parameterMappings不是实际的数据，只是对于数据的类型格式进行简单的数据结构描述性封装
+   */
   public StaticSqlSource(Configuration configuration, String sql, List<ParameterMapping> parameterMappings) {
     this.sql = sql;
     this.parameterMappings = parameterMappings;

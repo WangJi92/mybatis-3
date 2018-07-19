@@ -25,7 +25,8 @@ package org.apache.ibatis.mapping;
 public interface SqlSource {
 
   /**
-   *
+   *  这里获取BoundSQL 需要对于 ONGL的数据进行解析，还需要讲SQL中预处理的参数类型进行处理
+   *  返回的 BoundSql 已经是处理好的 ？？？，然后又参数的MapperMapping等等数据
    * @param parameterObject  调用数据库时候传递的参数
    * @return
    */

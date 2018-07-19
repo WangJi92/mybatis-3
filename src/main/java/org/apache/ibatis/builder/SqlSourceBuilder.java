@@ -15,10 +15,6 @@
  */
 package org.apache.ibatis.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.parsing.GenericTokenParser;
@@ -27,6 +23,10 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Clinton Begin
@@ -39,19 +39,41 @@ public class SqlSourceBuilder extends BaseBuilder {
     super(configuration);
   }
 
+  /**
+   *
+   * @param originalSql 原始SQL 经过解析啦 ONGL的 if-else  for_each 等等之后的数据 里面还包含 #{} 等这样的数据信息
+   * @param parameterType  传递参数的类型，也就是实际传递的参数的类型
+   * @param additionalParameters  解析传递参数后 DynamicContext#getBindings()  也就是当前空间中存在的绑定的变量的信息
+   * @return
+   */
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
+
+    // 替换掉数据中的#{} 将其替换为 ？，然后进行数据 parameterMappings收集
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
     String sql = parser.parse(originalSql);
+
+    //将转换后的数据 和需要传递的参数类型 构造成为 SqlSource
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
+  /**
+   * 参数映射标记处理程序
+   */
   private static class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
-
+    /**
+     *   从传递的参数中，解析到了#{}这样的参数数据添加起来
+     */
     private List<ParameterMapping> parameterMappings = new ArrayList<>();
     private Class<?> parameterType;
     private MetaObject metaParameters;
 
+    /**
+     *
+     * @param configuration
+     * @param parameterType
+     * @param additionalParameters  DynamicContext#getBindings()  也就是当前空间中存在的绑定的变量的信息
+     */
     public ParameterMappingTokenHandler(Configuration configuration, Class<?> parameterType, Map<String, Object> additionalParameters) {
       super(configuration);
       this.parameterType = parameterType;

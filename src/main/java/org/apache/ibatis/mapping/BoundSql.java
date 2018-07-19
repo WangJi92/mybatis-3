@@ -63,14 +63,22 @@ public class BoundSql {
   private final Object parameterObject;
 
   /**
-   * what？
+   * what？ 这个是在SQL预先处理的过程中，动态SQl解析过程中会解析的一些数据信息 DynamicContext# context.getBindings()中获取的数据添加到
    */
   private final Map<String, Object> additionalParameters;
   /**
-   * what？
+   * what？[Mybatis——MetaObject学习](https://blog.csdn.net/u013769320/article/details/50492965)
+   * 简介：MetaObject是Mybatis提供的一个用于方便、优雅访问对象属性的对象，通过它可以简化代码、不需要try/catch各种reflect异常，同时它支持对JavaBean、Collection、Map三种类型对象的操作。
    */
   private final MetaObject metaParameters;
 
+  /**
+   *
+   * @param configuration  配置文件的信息
+   * @param sql  ？？？ 带有预处理的SQL数据的信息
+   * @param parameterMappings  SQL中 ？？？ 对应的参数的描述信息
+   * @param parameterObject  传递的实际参数
+   */
   public BoundSql(Configuration configuration, String sql, List<ParameterMapping> parameterMappings, Object parameterObject) {
     this.sql = sql;
     this.parameterMappings = parameterMappings;
@@ -96,6 +104,11 @@ public class BoundSql {
     return additionalParameters.containsKey(paramName);
   }
 
+  /**
+   * 这里的添加的数据 实际指向  additionalParameters
+   * @param name
+   * @param value
+   */
   public void setAdditionalParameter(String name, Object value) {
     metaParameters.setValue(name, value);
   }
