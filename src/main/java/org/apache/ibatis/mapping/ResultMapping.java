@@ -15,35 +15,108 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 /**
+ * [Mybatis最入门---ResultMaps高级用法（下）](http://www.itkeyword.com/doc/8621715130732675359/discriminator-collection)
+ * ResultMap ---中的子选项
  * @author Clinton Begin
  */
 public class ResultMapping {
 
+  /**
+   * 核心配置
+   */
   private Configuration configuration;
+
+  /**
+   * 类中的属性
+   */
   private String property;
+
+  /**
+   * 数据库中字段信息
+   */
   private String column;
+
+  /**
+   * Java类型
+   */
   private Class<?> javaType;
+
+  /**
+   * JDBC类型
+   */
   private JdbcType jdbcType;
+
+  /**
+   * 类型转换器
+   */
   private TypeHandler<?> typeHandler;
+
+  /**
+   * 嵌套映射结果Id
+   */
   private String nestedResultMapId;
+
+  /**
+   * 嵌套查询Id
+   * [Mybatis关联查询（嵌套查询）](https://www.cnblogs.com/a8457013/p/7987964.html)
+   */
   private String nestedQueryId;
+
+  /**
+   * not Null列
+   */
   private Set<String> notNullColumns;
+
+  /**
+   * 列前缀
+   */
   private String columnPrefix;
+
+  /**
+   * 这个估计是这两者的区分，使用构造函数构造对象信息
+   * <constructor>
+   *   <idArg column="id" javaType="int"/>
+   *   <arg column="username" javaType="String"/>
+   *</constructor>
+   *
+   * <resultMap id="userResultMap" type="User">
+          <id property="id" column="user_id" />
+          <result property="username" column="username"/>
+         <result property="password" column="password"/>
+   </resultMap>
+   *
+   */
   private List<ResultFlag> flags;
+
+  /**
+   * 复合合成的意思
+   */
   private List<ResultMapping> composites;
+
+  /**
+   * 结果集
+   */
   private String resultSet;
+
+  /**
+   * 外键列
+   */
   private String foreignColumn;
+
+  /**
+   * 是否延迟加载
+   */
   private boolean lazy;
 
   ResultMapping() {
@@ -133,7 +206,7 @@ public class ResultMapping {
     }
     
     public ResultMapping build() {
-      // lock down collections
+      // lock down collections 锁定集合
       resultMapping.flags = Collections.unmodifiableList(resultMapping.flags);
       resultMapping.composites = Collections.unmodifiableList(resultMapping.composites);
       resolveTypeHandler();
@@ -142,15 +215,15 @@ public class ResultMapping {
     }
 
     private void validate() {
-      // Issue #697: cannot define both nestedQueryId and nestedResultMapId
+      // Issue #697: cannot define both nestedQueryId and nestedResultMapId 不能同时定义嵌套查询Id和嵌套映射结果Id
       if (resultMapping.nestedQueryId != null && resultMapping.nestedResultMapId != null) {
         throw new IllegalStateException("Cannot define both nestedQueryId and nestedResultMapId in property " + resultMapping.property);
       }
-      // Issue #5: there should be no mappings without typehandler
+      // Issue #5: there should be no mappings without typehandler 这里应该没有不typehandler映射
       if (resultMapping.nestedQueryId == null && resultMapping.nestedResultMapId == null && resultMapping.typeHandler == null) {
         throw new IllegalStateException("No typehandler found for property " + resultMapping.property);
       }
-      // Issue #4 and GH #39: column is optional only in nested resultmaps but not in the rest
+      // Issue #4 and GH #39: column is optional only in nested resultmaps but not in the rest  列只在嵌套resultmaps是可选的但是不休息
       if (resultMapping.nestedResultMapId == null && resultMapping.column == null && resultMapping.composites.isEmpty()) {
         throw new IllegalStateException("Mapping is missing column attribute for property " + resultMapping.property);
       }
