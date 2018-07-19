@@ -32,7 +32,9 @@ import java.sql.Statement;
 import java.util.List;
 
 /**
+ *SimpleStatementHandler：用于处理Statement对象的数据库操作。
  *
+ * 至此，一个Sql命令，经过马拉松式的长跑（SqlSession-->Executor-->StatementHandler-->Statement-->DB）,终于如愿以偿的到达了终点。
  * @author Clinton Begin
  */
 public class SimpleStatementHandler extends BaseStatementHandler {
@@ -94,6 +96,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
   @Override
   public void parameterize(Statement statement) throws SQLException {
     // N/A
+    //创建了一个Statement对象，由于Statement对象不支持“?”参数，所以，parameterize()是空实现
   }
 
 }

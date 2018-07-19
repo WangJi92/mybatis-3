@@ -15,13 +15,6 @@
  */
 package org.apache.ibatis.executor.statement;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
@@ -34,7 +27,11 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.type.JdbcType;
 
+import java.sql.*;
+import java.util.List;
+
 /**
+ * CallableStatementHandler：用于处理CallableStatement对象的数据库操作。（存储过程）
  * @author Clinton Begin
  */
 public class CallableStatementHandler extends BaseStatementHandler {
@@ -92,6 +89,7 @@ public class CallableStatementHandler extends BaseStatementHandler {
   @Override
   public void parameterize(Statement statement) throws SQLException {
     registerOutputParameters((CallableStatement) statement);
+    //创建了一个CallableStatement对象，parameterize()则委托给ParameterHandler去设置。
     parameterHandler.setParameters((CallableStatement) statement);
   }
 

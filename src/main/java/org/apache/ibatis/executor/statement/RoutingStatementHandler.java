@@ -15,11 +15,6 @@
  */
 package org.apache.ibatis.executor.statement;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
@@ -29,13 +24,28 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
 /**
+ * RoutingStatementHandler：用于创建上面三种Handler的策略类。（简直是装饰设计模式的极大错误示范，别以为长的帅，我就不抨击它，根本没有存在的理由）
  * @author Clinton Begin
  */
 public class RoutingStatementHandler implements StatementHandler {
 
   private final StatementHandler delegate;
 
+  /**
+   *
+   * @param executor  执行器
+   * @param ms   代表某条具体的SQL 语句信息
+   * @param parameter  传递进来的参数信息
+   * @param rowBounds  分页参数
+   * @param resultHandler
+   * @param boundSql  具体的某条SQL 保护SQL信息
+   */
   public RoutingStatementHandler(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
 
     switch (ms.getStatementType()) {
