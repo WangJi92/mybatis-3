@@ -15,15 +15,22 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
+ *
+ 一个实际的SQL字符串从一个{@link SqlSource}后加工任何动态内容；
+ QL可能SQL占位符“?”和一个列表(命令)的参数映射
+
+ 每个参数的附加信息(至少输入对象的属性名值)
+
+ 也可以有额外的参数创建的动态语言(for循环,bind……)
  * An actual SQL String got from an {@link SqlSource} after having processed any dynamic content.
  * The SQL may have SQL placeholders "?" and an list (ordered) of an parameter mappings 
  * with the additional information for each parameter (at least the property name of the input object to read 
@@ -32,13 +39,36 @@ import org.apache.ibatis.session.Configuration;
  * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
  *
  * @author Clinton Begin
+ *
+ * <code>
+      <select id="selectPostsForBlog" parameterType="int" resultType="Post">
+       select * from Post where blog_id = #{blog_id}
+</select>
+ * </code>
  */
 public class BoundSql {
 
+  /**
+   * 字符串SQL
+   */
   private final String sql;
+  /**
+   * 参数映射List
+   */
   private final List<ParameterMapping> parameterMappings;
+
+  /**
+   * 参数对象
+   */
   private final Object parameterObject;
+
+  /**
+   * what？
+   */
   private final Map<String, Object> additionalParameters;
+  /**
+   * what？
+   */
   private final MetaObject metaParameters;
 
   public BoundSql(Configuration configuration, String sql, List<ParameterMapping> parameterMappings, Object parameterObject) {
