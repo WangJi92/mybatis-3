@@ -15,14 +15,6 @@
  */
 package org.apache.ibatis.executor;
 
-import static org.apache.ibatis.executor.ExecutionPlaceholder.EXECUTION_PLACEHOLDER;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.cursor.Cursor;
@@ -30,11 +22,7 @@ import org.apache.ibatis.executor.statement.StatementUtil;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.logging.jdbc.ConnectionLogger;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ParameterMode;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
@@ -44,6 +32,14 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static org.apache.ibatis.executor.ExecutionPlaceholder.EXECUTION_PLACEHOLDER;
+
 /**
  * @author Clinton Begin
  */
@@ -51,15 +47,42 @@ public abstract class BaseExecutor implements Executor {
 
   private static final Log log = LogFactory.getLog(BaseExecutor.class);
 
+  /**
+   * 事务控制
+   */
   protected Transaction transaction;
+  /**
+   * 代理的执行器
+   */
   protected Executor wrapper;
 
+  /**
+   * 延迟加载
+   */
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+  /**
+   * 永久缓存 本地缓存
+   */
   protected PerpetualCache localCache;
+
+  /**
+   *永久缓存  本地输出参数缓存
+   */
   protected PerpetualCache localOutputParameterCache;
+
+  /**
+   * mybaits 核心配置参数
+   */
   protected Configuration configuration;
 
+  /**
+   * 查询堆栈
+   */
   protected int queryStack;
+
+  /**
+   * 关闭了？
+   */
   private boolean closed;
 
   protected BaseExecutor(Configuration configuration, Transaction transaction) {
@@ -149,6 +172,8 @@ public abstract class BaseExecutor implements Executor {
     List<E> list;
     try {
       queryStack++;
+
+      //处理缓存哇
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
@@ -207,6 +232,8 @@ public abstract class BaseExecutor implements Executor {
     for (ParameterMapping parameterMapping : parameterMappings) {
       if (parameterMapping.getMode() != ParameterMode.OUT) {
         Object value;
+
+        //传递参数中的属性名称
         String propertyName = parameterMapping.getProperty();
         if (boundSql.hasAdditionalParameter(propertyName)) {
           value = boundSql.getAdditionalParameter(propertyName);
@@ -273,6 +300,17 @@ public abstract class BaseExecutor implements Executor {
   protected abstract List<BatchResult> doFlushStatements(boolean isRollback)
       throws SQLException;
 
+  /**
+   *
+   * @param ms  当前查询的语句的信息，包含的原始解析的信息
+   * @param parameter  传递的参数
+   * @param rowBounds 分页参数
+   * @param resultHandler
+   * @param boundSql  传递的SQL
+   * @param <E>
+   * @return
+   * @throws SQLException
+   */
   protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql)
       throws SQLException;
 
@@ -319,6 +357,18 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
+  /**
+   *
+   * @param ms
+   * @param parameter  传递的参数
+   * @param rowBounds  分页数据处理
+   * @param resultHandler
+   * @param key  缓存key
+   * @param boundSql  SQL数据
+   * @param <E>
+   * @return
+   * @throws SQLException
+   */
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
     localCache.putObject(key, EXECUTION_PLACEHOLDER);
@@ -347,7 +397,10 @@ public abstract class BaseExecutor implements Executor {
   public void setExecutorWrapper(Executor wrapper) {
     this.wrapper = wrapper;
   }
-  
+
+  /**
+   * 延迟加载
+   */
   private static class DeferredLoad {
 
     private final MetaObject resultObject;

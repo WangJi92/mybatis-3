@@ -15,9 +15,6 @@
  */
 package org.apache.ibatis.executor;
 
-import java.sql.SQLException;
-import java.util.List;
-
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -27,7 +24,11 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
+import java.sql.SQLException;
+import java.util.List;
+
 /**
+ * <P>[Mybatis3.3.x技术内幕（四）：五鼠闹东京之执行器Executor设计原本](https://my.oschina.net/zudajun/blog/667214)</P>
  * @author Clinton Begin
  */
 public interface Executor {
@@ -44,20 +45,50 @@ public interface Executor {
 
   List<BatchResult> flushStatements() throws SQLException;
 
+  /**
+   * 提交事务
+   * @param required
+   * @throws SQLException
+   */
   void commit(boolean required) throws SQLException;
 
+  /**
+   * 事务回滚
+   * @param required
+   * @throws SQLException
+   */
   void rollback(boolean required) throws SQLException;
 
+
+  /**
+   * 创建缓存的key
+   * @param ms  执行SQL
+   * @param parameterObject  传递的参数
+   * @param rowBounds  分页参数
+   * @param boundSql  SQL信息
+   * @return
+   */
   CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
 
   boolean isCached(MappedStatement ms, CacheKey key);
 
+  /**
+   * 清除本地缓存
+   */
   void clearLocalCache();
 
   void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType);
 
+  /**
+   * 获取事务控制
+   * @return
+   */
   Transaction getTransaction();
 
+  /**
+   * 关闭当前数据连接
+   * @param forceRollback
+   */
   void close(boolean forceRollback);
 
   boolean isClosed();

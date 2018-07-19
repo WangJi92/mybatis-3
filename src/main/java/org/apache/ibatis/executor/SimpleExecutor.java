@@ -32,6 +32,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * <p>每执行一次update或select，就开启一个Statement对象，用完立刻关闭Statement对象。（可以是Statement或PrepareStatement对象）</p>
+ * <P>[Mybatis3.3.x技术内幕（四）：五鼠闹东京之执行器Executor设计原本](https://my.oschina.net/zudajun/blog/667214)
+ * [Mybatis3.3.x技术内幕（六）：StatementHandler（Box stop here）](https://my.oschina.net/zudajun/blog/668378)
+ * </P>
  * @author Clinton Begin
  */
 public class SimpleExecutor extends BaseExecutor {
@@ -79,10 +83,21 @@ public class SimpleExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
+  /**
+   * 每次执行一次 创建一个 链接信息
+   * @param handler 执行语句 处理器
+   * @param statementLog
+   * @return
+   * @throws SQLException
+   */
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);
+
+    //链接参数配置
     stmt = handler.prepare(connection, transaction.getTimeout());
+
+    //设置参数
     handler.parameterize(stmt);
     return stmt;
   }
