@@ -16,12 +16,23 @@
 package org.apache.ibatis.parsing;
 
 /**
+ * 通用标记解析器
  * @author Clinton Begin
  */
 public class GenericTokenParser {
-
+  /**
+   * 以什么开始 ${
+   */
   private final String openToken;
+
+  /**
+   * 以什么结束 }
+   */
   private final String closeToken;
+
+  /**
+   * 解析处理器（解析标记 ${}）
+   */
   private final TokenHandler handler;
 
   public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {
@@ -30,6 +41,11 @@ public class GenericTokenParser {
     this.handler = handler;
   }
 
+  /**
+   * 将带有标记信息的${} 等等信息全部换成？，TokenHandler 中会将解析到的 数据转换为{@linkplain  org.apache.ibatis.mapping.ParameterMapping}
+   * @param text
+   * @return
+   */
   public String parse(String text) {
     if (text == null || text.isEmpty()) {
       return "";
@@ -45,7 +61,7 @@ public class GenericTokenParser {
     StringBuilder expression = null;
     while (start > -1) {
       if (start > 0 && src[start - 1] == '\\') {
-        // this open token is escaped. remove the backslash and continue.
+        // this open token is escaped. remove the backslash and continue. 这个开放的令牌是逃脱了。将反斜杠和继续
         builder.append(src, offset, start - offset - 1).append(openToken);
         offset = start + openToken.length();
       } else {
@@ -60,7 +76,7 @@ public class GenericTokenParser {
         int end = text.indexOf(closeToken, offset);
         while (end > -1) {
           if (end > offset && src[end - 1] == '\\') {
-            // this close token is escaped. remove the backslash and continue.
+            // this close token is escaped. remove the backslash and continue. 这令牌逃脱。将反斜杠和继续
             expression.append(src, offset, end - offset - 1).append(closeToken);
             offset = end + closeToken.length();
             end = text.indexOf(closeToken, offset);
@@ -75,6 +91,7 @@ public class GenericTokenParser {
           builder.append(src, start, src.length - start);
           offset = src.length;
         } else {
+          //这句话就是解析参数哦
           builder.append(handler.handleToken(expression.toString()));
           offset = end + closeToken.length();
         }
