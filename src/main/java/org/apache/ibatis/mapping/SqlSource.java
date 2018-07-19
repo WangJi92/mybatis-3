@@ -24,6 +24,11 @@ package org.apache.ibatis.mapping;
  */
 public interface SqlSource {
 
+  /**
+   *
+   * @param parameterObject  调用数据库时候传递的参数
+   * @return
+   */
   BoundSql getBoundSql(Object parameterObject);
 
 }
