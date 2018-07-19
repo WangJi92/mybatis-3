@@ -15,10 +15,10 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.Map;
-
 import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.session.Configuration;
+
+import java.util.Map;
 
 /**
  * @author Clinton Begin
@@ -51,6 +51,8 @@ public class ForEachSqlNode implements SqlNode {
   @Override
   public boolean apply(DynamicContext context) {
     Map<String, Object> bindings = context.getBindings();
+
+    // 获取到Context中集合的元素的信息
     final Iterable<?> iterable = evaluator.evaluateIterable(collectionExpression, bindings);
     if (!iterable.iterator().hasNext()) {
       return true;
@@ -103,6 +105,10 @@ public class ForEachSqlNode implements SqlNode {
     }
   }
 
+  /**
+   * 添加一个开始SQL前缀
+   * @param context
+   */
   private void applyOpen(DynamicContext context) {
     if (open != null) {
       context.appendSql(open);
@@ -115,10 +121,16 @@ public class ForEachSqlNode implements SqlNode {
     }
   }
 
+  /**
+   * 唯一标识
+   * @param item
+   * @param i
+   * @return
+   */
   private static String itemizeItem(String item, int i) {
     return ITEM_PREFIX + item + "_" + i;
   }
-
+  //过滤后的动态上下文
   private static class FilteredDynamicContext extends DynamicContext {
     private final DynamicContext delegate;
     private final int index;

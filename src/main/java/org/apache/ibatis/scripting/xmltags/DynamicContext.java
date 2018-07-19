@@ -15,18 +15,18 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import ognl.OgnlContext;
 import ognl.OgnlException;
 import ognl.OgnlRuntime;
 import ognl.PropertyAccessor;
-
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
+ * 这个Context 与spring的 el表达式有点类似的感觉，就是当前有哪些参数哦，就是 #{xxx} 这种需要替换的信息都是需要从这里获取
  * @author Clinton Begin
  */
 public class DynamicContext {
@@ -39,11 +39,18 @@ public class DynamicContext {
   }
 
   private final ContextMap bindings;
+
+  /**
+   * 保存解析后的SQL的信息
+   */
   private final StringBuilder sqlBuilder = new StringBuilder();
   private int uniqueNumber = 0;
 
   public DynamicContext(Configuration configuration, Object parameterObject) {
     if (parameterObject != null && !(parameterObject instanceof Map)) {
+      /**
+       * [Mybatis——MetaObject学习](https://blog.csdn.net/u013769320/article/details/50492965)
+       */
       MetaObject metaObject = configuration.newMetaObject(parameterObject);
       bindings = new ContextMap(metaObject);
     } else {
@@ -76,7 +83,11 @@ public class DynamicContext {
 
   static class ContextMap extends HashMap<String, Object> {
     private static final long serialVersionUID = 2977601501966151582L;
-
+    /**
+     * 不知道这个是干啥的
+     * 简介：MetaObject是Mybatis提供的一个用于方便、优雅访问对象属性的对象，通过它可以简化代码、不需要try/catch各种reflect异常，同时它支持对JavaBean、Collection、Map三种类型对象的操作
+     * [Mybatis——MetaObject学习](https://blog.csdn.net/u013769320/article/details/50492965)
+     */
     private MetaObject parameterMetaObject;
     public ContextMap(MetaObject parameterMetaObject) {
       this.parameterMetaObject = parameterMetaObject;
