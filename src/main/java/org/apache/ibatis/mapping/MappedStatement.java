@@ -15,10 +15,6 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -28,22 +24,63 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
+ * MappedStatement对象对应Mapper配置文件中的一个select/update/insert/delete节点，主要描述的是一条SQL语句
  * @author Clinton Begin
  */
 public final class MappedStatement {
 
   private String resource;
+  /**
+   * mybatis 核心配置
+   */
   private Configuration configuration;
+
+  /**
+   * 当前执行语句唯一标识的id
+   */
   private String id;
+
+  /**
+   * 最大获取数量
+   */
   private Integer fetchSize;
+
+  /**
+   * 查询超时设置
+   */
   private Integer timeout;
+
+  /**
+   * [Mybatis3.3.x技术内幕（五）：Executor之doFlushStatements(](https://my.oschina.net/zudajun/blog/668323)
+   * 各种Statement类型的
+   */
   private StatementType statementType;
   private ResultSetType resultSetType;
+
+  /**
+   * SQL输入数据信息
+   */
   private SqlSource sqlSource;
   private Cache cache;
+
+  /**
+   * 传递的参数的数据结构
+   */
   private ParameterMap parameterMap;
+
+  /**
+   * 返回额结果信息 一般就是一个
+   */
   private List<ResultMap> resultMaps;
+
+  /**
+   * 刷新缓存
+   */
   private boolean flushCacheRequired;
   private boolean useCache;
   private boolean resultOrdered;
@@ -51,8 +88,16 @@ public final class MappedStatement {
   private KeyGenerator keyGenerator;
   private String[] keyProperties;
   private String[] keyColumns;
+
+  /**
+   * 有没有嵌套的处理
+   */
   private boolean hasNestedResultMaps;
   private String databaseId;
+
+  /**
+   * 当前的日志信息
+   */
   private Log statementLog;
   private LanguageDriver lang;
   private String[] resultSets;
