@@ -16,6 +16,7 @@
 package org.apache.ibatis.mapping;
 
 /**
+ * [Mybatis3.3.x技术内幕（五）：Executor之doFlushStatements(](https://my.oschina.net/zudajun/blog/668323)
  * @author Clinton Begin
  */
 public enum StatementType {
