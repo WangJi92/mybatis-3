@@ -28,8 +28,8 @@ import java.util.HashMap;
  * attributes = (',' attribute)*
  * attribute = name '=' value
  * </pre>
- *
- * @author Frank D. Martinez [mnesarco]
+ * 看看 ParameterExpressionTest 这里面的例子，就是解析一个字符串，代码看起来很少功能很强大哦，看看例子断点跟踪一下就理解意思啦
+ * @author Frank D. Martinez [mnesarco] 参数表达式
  */
 public class ParameterExpression extends HashMap<String, String> {
 
