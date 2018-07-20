@@ -15,11 +15,12 @@
  */
 package org.apache.ibatis.reflection.property;
 
-import java.util.Locale;
-
 import org.apache.ibatis.reflection.ReflectionException;
 
+import java.util.Locale;
+
 /**
+ * 属性命名者，主要处理 get set  方法的截断信息等等
  * @author Clinton Begin
  */
 public final class PropertyNamer {
@@ -38,6 +39,7 @@ public final class PropertyNamer {
     }
 
     if (name.length() == 1 || (name.length() > 1 && !Character.isUpperCase(name.charAt(1)))) {
+      //第一个字母与小写
       name = name.substring(0, 1).toLowerCase(Locale.ENGLISH) + name.substring(1);
     }
 
@@ -45,6 +47,7 @@ public final class PropertyNamer {
   }
 
   public static boolean isProperty(String name) {
+    //是否为get set 等属性方法
     return name.startsWith("get") || name.startsWith("set") || name.startsWith("is");
   }
 
