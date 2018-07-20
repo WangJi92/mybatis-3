@@ -18,8 +18,18 @@ package org.apache.ibatis.reflection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * 缓存了多个类Class的反射器Reflector。（避免一个类，多次重复反射）
+ * [Mybatis3.3.x技术内幕（七）：Mybatis初始化之六个工具](https://my.oschina.net/zudajun/blog/668596)
+ */
 public class DefaultReflectorFactory implements ReflectorFactory {
+
+
   private boolean classCacheEnabled = true;
+
+  /**
+   * 缓存起来，避免多次反射获取Class类中的属性信息
+   */
   private final ConcurrentMap<Class<?>, Reflector> reflectorMap = new ConcurrentHashMap<>();
 
   public DefaultReflectorFactory() {
@@ -38,7 +48,7 @@ public class DefaultReflectorFactory implements ReflectorFactory {
   @Override
   public Reflector findForClass(Class<?> type) {
     if (classCacheEnabled) {
-            // synchronized (type) removed see issue #461
+            // synchronized (type) removed see issue #461  不存在就反射创建一个哦
       return reflectorMap.computeIfAbsent(type, Reflector::new);
     } else {
       return new Reflector(type);

@@ -17,9 +17,20 @@ package org.apache.ibatis.reflection;
 
 public interface ReflectorFactory {
 
+  /**
+   * 是否允许缓存保存的Class中的属性的信息
+   * [Mybatis3.3.x技术内幕（七）：Mybatis初始化之六个工具](https://my.oschina.net/zudajun/blog/668596)
+   * @return
+   */
   boolean isClassCacheEnabled();
 
   void setClassCacheEnabled(boolean classCacheEnabled);
 
+  /**
+   * 找到当前类中的Reflector 信息，这个类代表一组缓存的类定义的信息,允许简单的属性名之间的映射和getter / setter方法
+   * 通过封装 反射，方便调用属性的字段、方法等等，通过反射进行调用
+   * @param type
+   * @return
+   */
   Reflector findForClass(Class<?> type);
 }

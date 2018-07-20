@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * 等于从Field取值：field.get(obj)
  * @author Clinton Begin
  */
 public class GetFieldInvoker implements Invoker {

@@ -18,10 +18,24 @@ package org.apache.ibatis.reflection.invoker;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * 反射通过反射调用目标类的对象 ，设置字段的值、获取字段的值，调用方法等等
  * @author Clinton Begin
  */
 public interface Invoker {
+
+  /**
+   *
+   * @param target 目标类
+   * @param args  传递的参数（可能是设置Filed信息、可能是 传递的参数）
+   * @return
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   */
   Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException;
 
+  /**
+   * 可能是字段的类型，可能是方法的第一个参数 或者返回值的类型
+   * @return
+   */
   Class<?> getType();
 }

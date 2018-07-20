@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * 等于给Field赋值：field.set(obj, args[0])
  * @author Clinton Begin
  */
 public class SetFieldInvoker implements Invoker {
