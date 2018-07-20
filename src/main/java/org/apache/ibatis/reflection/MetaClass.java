@@ -15,23 +15,35 @@
  */
 package org.apache.ibatis.reflection;
 
+import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
+import org.apache.ibatis.reflection.invoker.Invoker;
+import org.apache.ibatis.reflection.invoker.MethodInvoker;
+import org.apache.ibatis.reflection.property.PropertyTokenizer;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import org.apache.ibatis.reflection.invoker.GetFieldInvoker;
-import org.apache.ibatis.reflection.invoker.Invoker;
-import org.apache.ibatis.reflection.invoker.MethodInvoker;
-import org.apache.ibatis.reflection.property.PropertyTokenizer;
-
 /**
+ * 元数据信息处理类，这个类有点类似于对于Reflector的代理的意思，很多的方法都是直接调用reflector中的方法
+ *
+ *
+ * 这个类的意思就是集成 PropertyTokenizer分词器、Reflector 反射器，可以通过类的属性去获取某个属性的值等等操作，具体可以查看MetaClass
+ * 这个类挺有用处的
  * @author Clinton Begin
  */
 public class MetaClass {
 
+  /**
+   * 方便反射处理 类中的字段信息的工厂
+   */
   private final ReflectorFactory reflectorFactory;
+
+  /**
+   * 方便反射处理 类中的字段信息 get 、set 等等信息
+   */
   private final Reflector reflector;
 
   private MetaClass(Class<?> type, ReflectorFactory reflectorFactory) {
@@ -43,11 +55,21 @@ public class MetaClass {
     return new MetaClass(type, reflectorFactory);
   }
 
+  /**
+   * 根据当前MetaCLass 中的数据类名称 产生新的 MetaClass
+   * @param name
+   * @return
+   */
   public MetaClass metaClassForProperty(String name) {
     Class<?> propType = reflector.getGetterType(name);
     return MetaClass.forClass(propType, reflectorFactory);
   }
 
+  /**
+   * findProperty 是不区分大小的，将原始的对应的值属性找出来
+   * @param name
+   * @return
+   */
   public String findProperty(String name) {
     StringBuilder prop = buildProperty(name, new StringBuilder());
     return prop.length() > 0 ? prop.toString() : null;
@@ -88,11 +110,21 @@ public class MetaClass {
     return getGetterType(prop);
   }
 
+  /**
+   * 根据分词信息找到当前对象的Class类型，生成新的MetaClass, 查找到其中属性的值
+   * @param prop
+   * @return
+   */
   private MetaClass metaClassForProperty(PropertyTokenizer prop) {
     Class<?> propType = getGetterType(prop);
     return MetaClass.forClass(propType, reflectorFactory);
   }
 
+  /**
+   * 找到当前分词器中的 前面的部分，获取器类型的数据信息，
+   * @param prop
+   * @return
+   */
   private Class<?> getGetterType(PropertyTokenizer prop) {
     Class<?> type = reflector.getGetterType(prop.getName());
     if (prop.getIndex() != null && Collection.class.isAssignableFrom(type)) {
@@ -145,6 +177,13 @@ public class MetaClass {
     }
   }
 
+  /**
+   * 1、首先属性分词器
+   * 2、查看当前类中是否存在这个字段 的父亲的部分
+   * 3、
+   * @param name
+   * @return
+   */
   public boolean hasGetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -158,6 +197,7 @@ public class MetaClass {
       return reflector.hasGetter(prop.getName());
     }
   }
+
 
   public Invoker getGetInvoker(String name) {
     return reflector.getGetInvoker(name);
@@ -186,6 +226,10 @@ public class MetaClass {
     return builder;
   }
 
+  /**
+   * 代理是否含有默认的构造方法
+   * @return
+   */
   public boolean hasDefaultConstructor() {
     return reflector.hasDefaultConstructor();
   }
