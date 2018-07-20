@@ -26,6 +26,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 
 /**
+ * 泛型参数解析,我自己写过一篇文章 [你真的了解Java泛型参数？spring ResolvableType更好的处理泛型](https://blog.csdn.net/u012881904/article/details/80813294)
  * @author Iwao AVE!
  */
 public class TypeParameterResolver {
