@@ -18,12 +18,30 @@ package org.apache.ibatis.reflection.property;
 import java.util.Iterator;
 
 /**
+ *
+ * 具体的查看例子 MetaObjectTest 这个类，对于这种数据的处理哦【  richType.richList[0] 类中的richType字段 的richList 的第一个数据   】
+ * 属性分词器 将属性中的 逗号 [] 等进行拆分能够区分父类和子类的信息
  * @author Clinton Begin
  */
 public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
+  /**
+   * 第一个逗号之前的数据，如果有 数组类型的数据[]，是去掉后面的 []之后的名称
+   */
   private String name;
+
+  /**
+   * 当前数据的全限定名称 比如：xxxx[0]
+   */
   private final String indexedName;
+
+  /**
+   * 当前是否存在集合数据的索引
+   */
   private String index;
+
+  /**
+   * 第一个逗号后面的都是孩子，没有逗号证明没有下面的属性啦
+   */
   private final String children;
 
   public PropertyTokenizer(String fullname) {
@@ -66,6 +84,7 @@ public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
 
   @Override
   public PropertyTokenizer next() {
+    //进行下一个数据的处理
     return new PropertyTokenizer(children);
   }
 
