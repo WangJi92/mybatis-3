@@ -29,8 +29,16 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  */
 public class MapWrapper extends BaseWrapper {
 
+  /**
+   * Object数据对象为Map 哦
+   */
   private final Map<String, Object> map;
 
+  /**
+   *
+   * @param metaObject  当前数据对象的员数据
+   * @param map  当前Map对象
+   */
   public MapWrapper(MetaObject metaObject, Map<String, Object> map) {
     super(metaObject);
     this.map = map;
@@ -38,6 +46,7 @@ public class MapWrapper extends BaseWrapper {
 
   @Override
   public Object get(PropertyTokenizer prop) {
+    //获取数据哦
     if (prop.getIndex() != null) {
       Object collection = resolveCollection(prop, map);
       return getCollectionValue(prop, collection);
@@ -58,16 +67,19 @@ public class MapWrapper extends BaseWrapper {
 
   @Override
   public String findProperty(String name, boolean useCamelCaseMapping) {
+    //Map不支持获取对象的属性
     return name;
   }
 
   @Override
   public String[] getGetterNames() {
+    //Map中的Key的数据信息
     return map.keySet().toArray(new String[map.keySet().size()]);
   }
 
   @Override
   public String[] getSetterNames() {
+    //Map中的Key的数据信息
     return map.keySet().toArray(new String[map.keySet().size()]);
   }
 
@@ -135,6 +147,7 @@ public class MapWrapper extends BaseWrapper {
 
   @Override
   public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+    //实例化一个Map 设置值创建一个MetaObject 方法处理Object对象的数据信息
     HashMap<String, Object> map = new HashMap<>();
     set(prop, map);
     return MetaObject.forObject(map, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(), metaObject.getReflectorFactory());

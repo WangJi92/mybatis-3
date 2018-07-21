@@ -27,7 +27,14 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
+  /**
+   * 没有参数
+   */
   protected static final Object[] NO_ARGUMENTS = new Object[0];
+
+  /**
+   * 包装对象的 元数据Object方便处理对象的复合属性 xxObjec.xx.x
+   */
   protected final MetaObject metaObject;
 
   protected BaseWrapper(MetaObject metaObject) {
@@ -38,15 +45,26 @@ public abstract class BaseWrapper implements ObjectWrapper {
     if ("".equals(prop.getName())) {
       return object;
     } else {
+      //获取当前数据中当前数据信息的值
       return metaObject.getValue(prop.getName());
     }
   }
 
+  /**
+   * 如果实体参数为集合类型，进行集合数据的获取，获取指定分词器上面的数据的信息
+   * @param prop  分词器，当前分词的数据的处理
+   * @param collection  集合数据对象
+   * @return
+   */
   protected Object getCollectionValue(PropertyTokenizer prop, Object collection) {
     if (collection instanceof Map) {
+      //获取当前集合中对象的数据的值
       return ((Map) collection).get(prop.getIndex());
     } else {
+      //分词器获取当前分词处理的是集合中的第几个数据
       int i = Integer.parseInt(prop.getIndex());
+
+      //是List 还是 其他的基本数据类型数组哦
       if (collection instanceof List) {
         return ((List) collection).get(i);
       } else if (collection instanceof Object[]) {
@@ -73,6 +91,12 @@ public abstract class BaseWrapper implements ObjectWrapper {
     }
   }
 
+  /**
+   * 设定指定的分词器上 某个集合上的数据的值，与上面的数据类似哦
+   * @param prop
+   * @param collection
+   * @param value
+   */
   protected void setCollectionValue(PropertyTokenizer prop, Object collection, Object value) {
     if (collection instanceof Map) {
       ((Map) collection).put(prop.getIndex(), value);

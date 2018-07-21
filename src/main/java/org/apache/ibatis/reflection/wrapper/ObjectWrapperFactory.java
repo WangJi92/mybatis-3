@@ -18,12 +18,25 @@ package org.apache.ibatis.reflection.wrapper;
 import org.apache.ibatis.reflection.MetaObject;
 
 /**
+ * 方便其他的包装类的扩展，目前只支持JavaBean 、Map、Collection
  * @author Clinton Begin
  */
 public interface ObjectWrapperFactory {
 
+  /**
+   * 是否包装
+   * @param object
+   * @return
+   */
   boolean hasWrapperFor(Object object);
 
+
+  /**
+   * 得到包装的对象
+   * @param metaObject  当前的元数据对象
+   * @param object
+   * @return
+   */
   ObjectWrapper getWrapperFor(MetaObject metaObject, Object object);
 
 }

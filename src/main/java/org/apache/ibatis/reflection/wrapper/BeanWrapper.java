@@ -31,7 +31,14 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
  */
 public class BeanWrapper extends BaseWrapper {
 
+  /**
+   * 当前处理的对象的类型哦
+   */
   private final Object object;
+
+  /**
+   * 类上的元数据，方便通过反射处理
+   */
   private final MetaClass metaClass;
 
   public BeanWrapper(MetaObject metaObject, Object object) {
@@ -42,10 +49,13 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public Object get(PropertyTokenizer prop) {
+    //分词器 有集合索引数据，证明当前分词的数据为一个集合哦
     if (prop.getIndex() != null) {
+      //找到当前集合的数据 ，通过索引获取集合的值
       Object collection = resolveCollection(prop, object);
       return getCollectionValue(prop, collection);
     } else {
+      //通过元数据获取数据的值的信息
       return getBeanProperty(prop, object);
     }
   }
@@ -62,6 +72,7 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public String findProperty(String name, boolean useCamelCaseMapping) {
+    //根据元数据找到对象上的属性的方法
     return metaClass.findProperty(name, useCamelCaseMapping);
   }
 
@@ -72,6 +83,7 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public String[] getSetterNames() {
+    //直接被元数据Class 代理啦
     return metaClass.getSetterNames();
   }
 
@@ -94,8 +106,11 @@ public class BeanWrapper extends BaseWrapper {
   public Class<?> getGetterType(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
+      // 通过元数据对象获取当前数据的类型，可能为因为当前数据没有值为空获取不到子数据MetaObject
+      //所有可以通过元数据Class 获取子的类型信息
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
       if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+        //直接根据类中的数据获取元数据的信息
         return metaClass.getGetterType(name);
       } else {
         return metaValue.getGetterType(prop.getChildren());
@@ -109,9 +124,12 @@ public class BeanWrapper extends BaseWrapper {
   public boolean hasSetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
+      // 通过元数据对象获取当前数据的类型，可能为因为当前数据没有值为空获取不到子数据MetaObject
+      //所有可以通过元数据Class 获取子的类型信息
       if (metaClass.hasSetter(prop.getIndexedName())) {
         MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
         if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+          //直接根据类中的数据获取元数据的信息
           return metaClass.hasSetter(name);
         } else {
           return metaValue.hasSetter(prop.getChildren());
@@ -126,11 +144,15 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public boolean hasGetter(String name) {
+    //这个属性可能为一个复合属性，需要分词器看看
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
       if (metaClass.hasGetter(prop.getIndexedName())) {
+        // 通过元数据对象获取当前数据的类型，可能为因为当前数据没有值为空获取不到子数据MetaObject
+        //所有可以通过元数据Class 获取子的类型信息
         MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
         if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+          //直接根据类中的数据获取元数据的信息
           return metaClass.hasGetter(name);
         } else {
           return metaValue.hasGetter(prop.getChildren());
@@ -145,11 +167,19 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
+   //创建一个员数据对象、方便处理对象的相关的属性的创建
     MetaObject metaValue;
+
+    // 获取分词器中具体对象的类型
     Class<?> type = getSetterType(prop.getName());
     try {
+      //创建一个对象的信息
       Object newObject = objectFactory.create(type);
+
+      //创建元数据对象
       metaValue = MetaObject.forObject(newObject, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(), metaObject.getReflectorFactory());
+
+      //根据分词器设置对象属性的值的信息
       set(prop, newObject);
     } catch (Exception e) {
       throw new ReflectionException("Cannot set value of property '" + name + "' because '" + name + "' is null and cannot be instantiated on instance of " + type.getName() + ". Cause:" + e.toString(), e);
@@ -157,6 +187,12 @@ public class BeanWrapper extends BaseWrapper {
     return metaValue;
   }
 
+  /**
+   * 获取Bean数据信息，通过 员数据调用反射的方式获取Filed 或者 Method的数据值
+   * @param prop
+   * @param object
+   * @return
+   */
   private Object getBeanProperty(PropertyTokenizer prop, Object object) {
     try {
       Invoker method = metaClass.getGetInvoker(prop.getName());
@@ -172,6 +208,12 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  /**
+   * 根据分词器设置 对象的属性值哦
+   * @param prop
+   * @param object
+   * @param value
+   */
   private void setBeanProperty(PropertyTokenizer prop, Object object, Object value) {
     try {
       Invoker method = metaClass.getSetInvoker(prop.getName());
@@ -188,16 +230,19 @@ public class BeanWrapper extends BaseWrapper {
 
   @Override
   public boolean isCollection() {
+    // TODO  这里默认返回false 是为啥？
     return false;
   }
 
   @Override
   public void add(Object element) {
+    // TODO 这里不支持集合 ？
     throw new UnsupportedOperationException();
   }
 
   @Override
   public <E> void addAll(List<E> list) {
+    //TODO 这里不支持List
     throw new UnsupportedOperationException();
   }
 

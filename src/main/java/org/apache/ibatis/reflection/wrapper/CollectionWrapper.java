@@ -23,6 +23,7 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
+ * 集合数据只是支持添加、不支持查看数据的各种类型哦
  * @author Clinton Begin
  */
 public class CollectionWrapper implements ObjectWrapper {
