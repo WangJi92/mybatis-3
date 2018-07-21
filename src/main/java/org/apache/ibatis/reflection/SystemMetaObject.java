@@ -21,12 +21,23 @@ import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 
 /**
+ * Mybatis 系统中元数据处理对象类，包含的很多的默认的方法
  * @author Clinton Begin
  */
 public final class SystemMetaObject {
-
+  /**
+   * 默认对象创建器
+   */
   public static final ObjectFactory DEFAULT_OBJECT_FACTORY = new DefaultObjectFactory();
+
+  /**
+   * 默认工厂包装器、感觉没有进行什么处理啊，其实就是为了包装类扩展的处理
+   */
   public static final ObjectWrapperFactory DEFAULT_OBJECT_WRAPPER_FACTORY = new DefaultObjectWrapperFactory();
+
+  /**
+   * 空对象元数据信息
+   */
   public static final MetaObject NULL_META_OBJECT = MetaObject.forObject(NullObject.class, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
 
   private SystemMetaObject() {
@@ -36,6 +47,11 @@ public final class SystemMetaObject {
   private static class NullObject {
   }
 
+  /**
+   * 使用默认的配置创建元数据对象信息
+   * @param object
+   * @return
+   */
   public static MetaObject forObject(Object object) {
     return MetaObject.forObject(object, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
   }
