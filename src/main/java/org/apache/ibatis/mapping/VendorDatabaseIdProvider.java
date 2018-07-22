@@ -27,13 +27,14 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
- * Vendor DatabaseId provider
+ * Vendor DatabaseId provider  供应商DatabaseId提供商
  * 
- * It returns database product name as a databaseId
+ * It returns database product name as a databaseId  它将数据库产品名称作为databaseId返回
+ * 如果用户提供属性，则使用它来翻译数据库产品名称
  * If the user provides a properties it uses it to translate database product name
  * key="Microsoft SQL Server", value="ms" will return "ms" 
  * It can return null, if no database product name or 
- * a properties was specified and no translation was found 
+ * a properties was specified and no translation was found  指定了属性，未找到任何翻译
  * 
  * @author Eduardo Macarron
  */
