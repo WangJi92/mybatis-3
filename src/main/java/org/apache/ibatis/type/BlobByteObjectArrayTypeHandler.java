@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.sql.*;
 
 /**
+ * LONGVARBINARY
  * @author Clinton Begin
  */
 public class BlobByteObjectArrayTypeHandler extends BaseTypeHandler<Byte[]> {

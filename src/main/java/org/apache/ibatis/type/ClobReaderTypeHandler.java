@@ -19,6 +19,7 @@ import java.io.Reader;
 import java.sql.*;
 
 /**
+ * LONGVARCHAR
  * The {@link TypeHandler} for {@link Clob}/{@link Reader} using method supported at JDBC 4.0.
  * @since 3.4.0
  * @author Kazuki Shimizu

@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * LONGVARBINARY
  * @author Clinton Begin
  */
 public class ByteObjectArrayTypeHandler extends BaseTypeHandler<Byte[]> {

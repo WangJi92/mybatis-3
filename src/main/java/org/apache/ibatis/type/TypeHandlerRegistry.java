@@ -49,14 +49,26 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.reflection.Jdk;
 
 /**
+ * TypeHandler 注册工厂哦
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public final class TypeHandlerRegistry {
 
+  /**
+   * JdbcType-->TypeHandler
+   */
   private final Map<JdbcType, TypeHandler<?>> JDBC_TYPE_HANDLER_MAP = new EnumMap<>(JdbcType.class);
+
+  /**
+   * Class Type --><JdbcType,TypeHandler>
+   */
   private final Map<Type, Map<JdbcType, TypeHandler<?>>> TYPE_HANDLER_MAP = new ConcurrentHashMap<>();
   private final TypeHandler<Object> UNKNOWN_TYPE_HANDLER = new UnknownTypeHandler(this);
+
+  /**
+   * Class--->TyeHandler 所有的类型处理器
+   */
   private final Map<Class<?>, TypeHandler<?>> ALL_TYPE_HANDLERS_MAP = new HashMap<>();
 
   private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = Collections.emptyMap();
@@ -391,8 +403,14 @@ public final class TypeHandlerRegistry {
 
   // Only handler type
 
+  /**
+   * 获取处理类型的注解
+   * @param typeHandlerClass
+   */
   public void register(Class<?> typeHandlerClass) {
     boolean mappedTypeFound = false;
+
+    //Java Type的类型，然后将处理的TypeHandler注册到仓库中去
     MappedTypes mappedTypes = typeHandlerClass.getAnnotation(MappedTypes.class);
     if (mappedTypes != null) {
       for (Class<?> javaTypeClass : mappedTypes.value()) {
@@ -445,6 +463,10 @@ public final class TypeHandlerRegistry {
 
   // scan
 
+  /**
+   * 扫描指定包下面的TypeHandler处理器
+   * @param packageName
+   */
   public void register(String packageName) {
     ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
     resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);

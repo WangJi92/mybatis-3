@@ -22,6 +22,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * [mybatis 处理数组类型及使用Json格式保存数据 JsonTypeHandler and ArrayTypeHandler](https://www.cnblogs.com/kylindai/p/3563818.html)
+ * 基本上没有使用过这样的东西
+ * {@linkplain PreparedStatement#setArray(int, Array) 这种类型}
  * @author Clinton Begin
  */
 public class ArrayTypeHandler extends BaseTypeHandler<Object> {

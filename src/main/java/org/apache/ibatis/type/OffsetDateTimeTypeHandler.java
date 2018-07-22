@@ -26,6 +26,7 @@ import java.time.ZoneId;
 import org.apache.ibatis.lang.UsesJava8;
 
 /**
+ * [Java 8 新特性：Java 类库的新特性之日期时间API (Date/Time API )](https://blog.csdn.net/sun_promise/article/details/51383618)
  * @since 3.4.5
  * @author Tomas Rohovsky
  */
