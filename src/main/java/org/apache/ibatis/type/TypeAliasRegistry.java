@@ -33,6 +33,7 @@ import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.io.Resources;
 
 /**
+ * 类型别名注册工厂，扫描包，然后注册到系统TYPE_ALIASES
  * @author Clinton Begin
  */
 public class TypeAliasRegistry {
@@ -113,6 +114,7 @@ public class TypeAliasRegistry {
       if (TYPE_ALIASES.containsKey(key)) {
         value = (Class<T>) TYPE_ALIASES.get(key);
       } else {
+        // 默认的没有找到，就去查看类信息
         value = (Class<T>) Resources.classForName(string);
       }
       return value;
@@ -121,6 +123,10 @@ public class TypeAliasRegistry {
     }
   }
 
+  /**
+   * 别名包注册哦
+   * @param packageName
+   */
   public void registerAliases(String packageName){
     registerAliases(packageName, Object.class);
   }
@@ -130,7 +136,7 @@ public class TypeAliasRegistry {
     resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
     Set<Class<? extends Class<?>>> typeSet = resolverUtil.getClasses();
     for(Class<?> type : typeSet){
-      // Ignore inner classes and interfaces (including package-info.java)
+      // Ignore inner classes and interfaces (including package-info.java) 忽略内部类和接口（包括package-info.java）
       // Skip also inner classes. See issue #6
       if (!type.isAnonymousClass() && !type.isInterface() && !type.isMemberClass()) {
         registerAlias(type);
@@ -138,6 +144,10 @@ public class TypeAliasRegistry {
     }
   }
 
+  /**
+   * 包上面是不是有别名的注解哦
+   * @param type
+   */
   public void registerAlias(Class<?> type) {
     String alias = type.getSimpleName();
     Alias aliasAnnotation = type.getAnnotation(Alias.class);
