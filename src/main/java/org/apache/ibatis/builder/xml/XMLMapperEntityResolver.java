@@ -25,6 +25,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
+ * [EntityResolver作用](https://blog.csdn.net/sicofield/article/details/79282918)
  * Offline entity resolver for the MyBatis DTDs
  * 
  * @author Clinton Begin
