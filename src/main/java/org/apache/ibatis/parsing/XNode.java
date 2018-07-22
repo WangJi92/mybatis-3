@@ -31,11 +31,33 @@ import org.w3c.dom.NodeList;
  */
 public class XNode {
 
+  /**
+   * 当前节点
+   */
   private final Node node;
+  /**
+   * 当前节点的名称
+   */
   private final String name;
+
+  /**
+   * 这个body 是啥
+   */
   private final String body;
+
+  /**
+   * 当前节点的的属性值
+   */
   private final Properties attributes;
+
+  /**
+   * 解析参数是否 ${} 需要的变量
+   */
   private final Properties variables;
+
+  /**
+   * xPath 解析器
+   */
   private final XPathParser xpathParser;
 
   public XNode(XPathParser xpathParser, Node node, Properties variables) {
@@ -376,6 +398,7 @@ public class XNode {
   }
 
   private String getBodyData(Node child) {
+    //当前节点的类型为 CDATA 或者是 TEXT_NODE的时候才得到数据的Body的值的信息哦
     if (child.getNodeType() == Node.CDATA_SECTION_NODE
         || child.getNodeType() == Node.TEXT_NODE) {
       String data = ((CharacterData) child).getData();
