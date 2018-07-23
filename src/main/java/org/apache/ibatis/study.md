@@ -10,3 +10,4 @@
 [Mapper XML 文件](http://www.mybatis.org/mybatis-3/zh/sqlmap-xml.html)
 [MyBatis ofType和javaType区别](https://blog.csdn.net/u013216156/article/details/78642920/)
 [动态 SQL 中的可插拔脚本语言](http://www.mybatis.org/mybatis-3/zh/dynamic-sql.html)
+[Java 7 新的 try-with-resources 语句，自动资源释放](https://www.oschina.net/question/12_10706)
