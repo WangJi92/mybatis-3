@@ -82,10 +82,26 @@ public final class MappedStatement {
    * 刷新缓存
    */
   private boolean flushCacheRequired;
+
+  /**
+   * 是否使用一级缓存
+   */
   private boolean useCache;
+
+  /**
+   * http://www.mybatis.org/mybatis-3/zh/sqlmap-xml.html
+   */
   private boolean resultOrdered;
+
+  /**
+   * 当前查询语句的类型
+   */
   private SqlCommandType sqlCommandType;
   private KeyGenerator keyGenerator;
+
+  /**
+   * http://www.mybatis.org/mybatis-3/zh/sqlmap-xml.html
+   */
   private String[] keyProperties;
   private String[] keyColumns;
 
@@ -99,6 +115,10 @@ public final class MappedStatement {
    * 当前的日志信息
    */
   private Log statementLog;
+
+  /**
+   * org.apache.ibatis.scripting.xmltags.XMLLanguageDriver  what ?
+   */
   private LanguageDriver lang;
   private String[] resultSets;
 

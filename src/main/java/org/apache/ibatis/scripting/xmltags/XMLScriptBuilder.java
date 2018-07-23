@@ -15,11 +15,6 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.mapping.SqlSource;
@@ -29,7 +24,13 @@ import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
+ * xml数据解析
  * @author Clinton Begin
  */
 public class XMLScriptBuilder extends BaseBuilder {
@@ -43,6 +44,12 @@ public class XMLScriptBuilder extends BaseBuilder {
     this(configuration, context, null);
   }
 
+  /**
+   *
+   * @param configuration
+   * @param context  当前要解析的 node
+   * @param parameterType
+   */
   public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType) {
     super(configuration);
     this.context = context;

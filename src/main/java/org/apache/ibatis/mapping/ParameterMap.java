@@ -21,11 +21,19 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * <parameterMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
+ *   <parameter property="id" />
+ *</parameterMap>
+ *
+ *
  * 传入参数解析
  * @author Clinton Begin
  */
 public class ParameterMap {
 
+  /**
+   * id 一一对应吧
+   */
   private String id;
 
   /**

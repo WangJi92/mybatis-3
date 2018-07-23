@@ -15,11 +15,6 @@
  */
 package org.apache.ibatis.builder;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.session.Configuration;
@@ -27,6 +22,11 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * @author Clinton Begin
@@ -57,23 +57,52 @@ public abstract class BaseBuilder {
     return configuration;
   }
 
+  /**
+   * 正则表达式的处理
+   * @param regex
+   * @param defaultValue
+   * @return
+   */
   protected Pattern parseExpression(String regex, String defaultValue) {
     return Pattern.compile(regex == null ? defaultValue : regex);
   }
 
+  /**
+   * boolean 默认值处理
+   * @param value
+   * @param defaultValue
+   * @return
+   */
   protected Boolean booleanValueOf(String value, Boolean defaultValue) {
     return value == null ? defaultValue : Boolean.valueOf(value);
   }
 
+  /**
+   * 处Integer的结果集，还有默认值的设置处理
+   * @param value
+   * @param defaultValue
+   * @return
+   */
   protected Integer integerValueOf(String value, Integer defaultValue) {
     return value == null ? defaultValue : Integer.valueOf(value);
   }
 
+  /**
+   * 处理逗号分隔的结果集
+   * @param value
+   * @param defaultValue
+   * @return
+   */
   protected Set<String> stringSetValueOf(String value, String defaultValue) {
     value = (value == null ? defaultValue : value);
     return new HashSet<>(Arrays.asList(value.split(",")));
   }
 
+  /**
+   * 根据别名获取到JDBC的参数类型哦
+   * @param alias
+   * @return
+   */
   protected JdbcType resolveJdbcType(String alias) {
     if (alias == null) {
       return null;
@@ -85,6 +114,11 @@ public abstract class BaseBuilder {
     }
   }
 
+  /**
+   * 设置 SQL 结果集的参数处理
+   * @param alias
+   * @return
+   */
   protected ResultSetType resolveResultSetType(String alias) {
     if (alias == null) {
       return null;
@@ -96,6 +130,11 @@ public abstract class BaseBuilder {
     }
   }
 
+  /**
+   * 根据参数的类型 输入 输出参数 获取 ParameterMode
+   * @param alias
+   * @return
+   */
   protected ParameterMode resolveParameterMode(String alias) {
     if (alias == null) {
       return null;
@@ -107,6 +146,11 @@ public abstract class BaseBuilder {
     }
   }
 
+  /**
+   * 创建alias的实例
+   * @param alias
+   * @return
+   */
   protected Object createInstance(String alias) {
     Class<?> clazz = resolveClass(alias);
     if (clazz == null) {
@@ -119,6 +163,12 @@ public abstract class BaseBuilder {
     }
   }
 
+  /**
+   * 找到alias的类名称
+   * @param alias
+   * @param <T>
+   * @return
+   */
   protected <T> Class<? extends T> resolveClass(String alias) {
     if (alias == null) {
       return null;
@@ -130,6 +180,12 @@ public abstract class BaseBuilder {
     }
   }
 
+  /**
+   * 通过别名获取 TypeHandler
+   * @param javaType
+   * @param typeHandlerAlias
+   * @return
+   */
   protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
     if (typeHandlerAlias == null) {
       return null;
@@ -143,6 +199,12 @@ public abstract class BaseBuilder {
     return resolveTypeHandler(javaType, typeHandlerType);
   }
 
+  /**
+   * 找到typeHandler的实例
+   * @param javaType
+   * @param typeHandlerType
+   * @return
+   */
   protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
     if (typeHandlerType == null) {
       return null;
@@ -156,6 +218,12 @@ public abstract class BaseBuilder {
     return handler;
   }
 
+  /**
+   * 处理别名
+   * @param alias
+   * @param <T>
+   * @return
+   */
   protected <T> Class<? extends T> resolveAlias(String alias) {
     return typeAliasRegistry.resolveAlias(alias);
   }

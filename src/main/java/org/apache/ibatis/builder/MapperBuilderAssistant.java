@@ -15,50 +15,47 @@
  */
 package org.apache.ibatis.builder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.decorators.LruCache;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
-import org.apache.ibatis.mapping.CacheBuilder;
-import org.apache.ibatis.mapping.Discriminator;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMap;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ParameterMode;
-import org.apache.ibatis.mapping.ResultFlag;
-import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.mapping.ResultSetType;
-import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.mapping.StatementType;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
+import java.util.*;
+
 /**
+ *Mapper 解析助手哦
  * @author Clinton Begin
  */
 public class MapperBuilderAssistant extends BaseBuilder {
 
+  /**
+   * 当前的命名空间
+   */
   private String currentNamespace;
+  /**
+   * 配置资源的路径
+   */
   private final String resource;
+  /**
+   * 当前空间的缓存
+   */
   private Cache currentCache;
+
   private boolean unresolvedCacheRef; // issue #676
 
+  /**
+   * Mapper构建助手，用于组装解析出来的配置，生成Cache、ResultMap、MappedStatement等对象
+   *
+   * @param configuration  核心配置文件
+   * @param resource  MapperAnnotationBuilder 传递过来好像意义不大
+   */
   public MapperBuilderAssistant(Configuration configuration, String resource) {
     super(configuration);
     ErrorContext.instance().resource(resource);
@@ -69,6 +66,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return currentNamespace;
   }
 
+  /**
+   * 设置命名空间 也就是当前类的全限定名称
+   * @param currentNamespace
+   */
   public void setCurrentNamespace(String currentNamespace) {
     if (currentNamespace == null) {
       throw new BuilderException("The mapper element requires a namespace attribute to be specified.");
@@ -82,6 +83,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
     this.currentNamespace = currentNamespace;
   }
 
+  /**
+   * 处理引用其他 空间的信息，如果当前空间中需要加上当前空间的 namespace
+   * @param base
+   * @param isReference
+   * @return
+   */
   public String applyCurrentNamespace(String base, boolean isReference) {
     if (base == null) {
       return null;
@@ -121,6 +128,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
   }
 
+  /**
+   * 构建缓存
+   * @param typeClass
+   * @param evictionClass
+   * @param flushInterval
+   * @param size
+   * @param readWrite
+   * @param blocking
+   * @param props
+   * @return
+   */
   public Cache useNewCache(Class<? extends Cache> typeClass,
       Class<? extends Cache> evictionClass,
       Long flushInterval,
@@ -142,6 +160,16 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return cache;
   }
 
+  /**
+   *  <parameterMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
+   *    <parameter property="id" />
+   *  </parameterMap>
+   *
+   * @param id  selectAuthor类似这个id
+   * @param parameterClass  类似这个class
+   * @param parameterMappings  解析里面的参数构造的形式
+   * @return
+   */
   public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
     id = applyCurrentNamespace(id, false);
     ParameterMap parameterMap = new ParameterMap.Builder(configuration, id, parameterClass, parameterMappings).build();
@@ -149,6 +177,20 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return parameterMap;
   }
 
+  /**
+   *  <parameterMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
+   *    <parameter property="id" />  这里只是处理参数映射的一部分数据，所以叫 ParameterMapping  <parameter property="id" /> 类似这个
+   * </parameterMap>
+   * @param parameterType
+   * @param property
+   * @param javaType
+   * @param jdbcType
+   * @param resultMap
+   * @param parameterMode
+   * @param typeHandler
+   * @param numericScale
+   * @return
+   */
   public ParameterMapping buildParameterMapping(
       Class<?> parameterType,
       String property,
@@ -180,6 +222,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
       Discriminator discriminator,
       List<ResultMapping> resultMappings,
       Boolean autoMapping) {
+
+    //添加当前空间的唯一标识符
     id = applyCurrentNamespace(id, false);
     extend = applyCurrentNamespace(extend, true);
 
@@ -188,9 +232,11 @@ public class MapperBuilderAssistant extends BaseBuilder {
         throw new IncompleteElementException("Could not find a parent resultmap with id '" + extend + "'");
       }
       ResultMap resultMap = configuration.getResultMap(extend);
+
+      //处理外部Extend 的引用 添加他的ResultMapping 信息
       List<ResultMapping> extendedResultMappings = new ArrayList<>(resultMap.getResultMappings());
       extendedResultMappings.removeAll(resultMappings);
-      // Remove parent constructor if this resultMap declares a constructor.
+      // Remove parent constructor if this resultMap declares a constructor.  删除父构造函数如果这个结果地图声明一个构造函数
       boolean declaresConstructor = false;
       for (ResultMapping resultMapping : resultMappings) {
         if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
@@ -208,9 +254,13 @@ public class MapperBuilderAssistant extends BaseBuilder {
       }
       resultMappings.addAll(extendedResultMappings);
     }
+
+    //构建ResultMap
     ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
         .discriminator(discriminator)
         .build();
+
+    //添加到配置中去
     configuration.addResultMap(resultMap);
     return resultMap;
   }
@@ -275,6 +325,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     id = applyCurrentNamespace(id, false);
     boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
 
+    //构造MappedStatement
     MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
         .resource(resource)
         .fetchSize(fetchSize)
@@ -299,6 +350,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     MappedStatement statement = statementBuilder.build();
+
+    //全局添加到啦 配置文件中去啦
     configuration.addMappedStatement(statement);
     return statement;
   }
@@ -437,13 +490,28 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return javaType;
   }
 
+  /**
+   * <parameterMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
+   *   <parameter property="id" />
+   * </parameterMap>
+   *  通过当前的 type类型org.apache.ibatis.domain.blog.Author 构造元数据Class，获取到熟悉字段 id ，的Java类型
+   *  对于MetaClass 不了解的看看相关的类 {@linkplain MetaClass#getSetterType(String) 方便获取类中存在的元数据信息}
+   * 处理默认的Java属性，通过
+   * @param resultType
+   * @param property
+   * @param javaType
+   * @return
+   */
   private Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType, JdbcType jdbcType) {
     if (javaType == null) {
       if (JdbcType.CURSOR.equals(jdbcType)) {
+        // JDBC 是游标 Java类型就是 ResultSet.class
         javaType = java.sql.ResultSet.class;
       } else if (Map.class.isAssignableFrom(resultType)) {
+        //如果当前的type 是一个Map，那么Java的数据类型就是一个Object啦
         javaType = Object.class;
       } else {
+        //否则就是解析resultType的类型 ，通过解析元数据获取熟悉的类型
         MetaClass metaResultType = MetaClass.forClass(resultType, configuration.getReflectorFactory());
         javaType = metaResultType.getGetterType(property);
       }

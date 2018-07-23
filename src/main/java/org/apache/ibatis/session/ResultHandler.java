@@ -16,6 +16,7 @@
 package org.apache.ibatis.session;
 
 /**
+ * <P>[MyBatis插件原理第五篇——ParameterHandler 和 ResultSetHandler](https://blog.csdn.net/ykzhen2015/article/details/51690672)</P>
  * @author Clinton Begin
  */
 public interface ResultHandler<T> {

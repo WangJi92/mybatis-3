@@ -161,6 +161,9 @@ public class ParameterMapping {
       }
     }
 
+    /**
+     * 配置数据的时候 Java的数据类型存在，但是 typeHandler没有，这个时候需要去解析默认的typehandler
+     */
     private void resolveTypeHandler() {
       if (parameterMapping.typeHandler == null && parameterMapping.javaType != null) {
         Configuration configuration = parameterMapping.configuration;

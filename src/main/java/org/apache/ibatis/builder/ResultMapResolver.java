@@ -15,22 +15,58 @@
  */
 package org.apache.ibatis.builder;
 
-import java.util.List;
-
 import org.apache.ibatis.mapping.Discriminator;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.ResultMapping;
 
+import java.util.List;
+
 /**
+ * <resultMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author" >
+   <id column="id" property="id" />
+   <result property="username" column="username" />
+   <result property="password" column="password" />
+   <result property="email" column="email" />
+   <result property="bio" column="bio" />
+   <result property="favouriteSection" column="favourite_section" />
+ </resultMap>
+ *
+ * 结果映射解析器
  * @author Eduardo Macarron
  */
 public class ResultMapResolver {
+  /**
+   * Mapper构建助手
+   */
   private final MapperBuilderAssistant assistant;
+
+  /**
+   * 对应 selectAuthor
+   */
   private final String id;
+  /**
+   * 当前type的类型
+   */
   private final Class<?> type;
+
+  /**
+   * 是否继承  http://www.mybatis.org/mybatis-3/zh/sqlmap-xml.html
+   */
   private final String extend;
+
+  /**
+   * 鉴别器
+   */
   private final Discriminator discriminator;
+
+  /**
+   * 映射文件的每一项信息
+   */
   private final List<ResultMapping> resultMappings;
+
+  /**
+   * 是否自动映射
+   */
   private final Boolean autoMapping;
 
   public ResultMapResolver(MapperBuilderAssistant assistant, String id, Class<?> type, String extend, Discriminator discriminator, List<ResultMapping> resultMappings, Boolean autoMapping) {
