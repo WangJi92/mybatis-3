@@ -9,3 +9,4 @@
 [java大量数据加载时resultSetType参数的设置 TYPE_FORWARD_ONLY](https://blog.csdn.net/10km/article/details/50404694)
 [Mapper XML 文件](http://www.mybatis.org/mybatis-3/zh/sqlmap-xml.html)
 [MyBatis ofType和javaType区别](https://blog.csdn.net/u013216156/article/details/78642920/)
+[动态 SQL 中的可插拔脚本语言](http://www.mybatis.org/mybatis-3/zh/dynamic-sql.html)

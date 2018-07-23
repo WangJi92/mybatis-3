@@ -309,6 +309,10 @@ public class XNode {
     }
   }
 
+  /**
+   * 获取当前节点的儿子节点信息
+   * @return
+   */
   public List<XNode> getChildren() {
     List<XNode> children = new ArrayList<>();
     NodeList nodeList = node.getChildNodes();
@@ -323,6 +327,16 @@ public class XNode {
     return children;
   }
 
+  /**
+   * org/apache/ibatis/builder/CustomizedSettingsMapperConfig.xml
+   *  <properties resource="org/apache/ibatis/builder/jdbc.properties">
+          <property name="prop1" value="aaaa"/>
+            <property name="jdbcTypeForNull" value="NULL" />
+        </properties>
+   *
+   * 获取所有的子元素的属性值，放置为Properties
+   * @return
+   */
   public Properties getChildrenAsProperties() {
     Properties properties = new Properties();
     for (XNode child : getChildren()) {

@@ -73,6 +73,9 @@ public final class TypeHandlerRegistry {
 
   private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = Collections.emptyMap();
 
+  /**
+   * 指定 Enum 使用的默认 TypeHandler 。 (从3.4.5开始)	一个类型别名或完全限定类名。	org.apache.ibatis.type.EnumTypeHandler
+   */
   private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
 
   public TypeHandlerRegistry() {
