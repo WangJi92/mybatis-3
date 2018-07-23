@@ -15,26 +15,19 @@
  */
 package org.apache.ibatis.reflection.wrapper;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Clinton Begin
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
-  /**
-   * 没有参数
-   */
   protected static final Object[] NO_ARGUMENTS = new Object[0];
-
-  /**
-   * 包装对象的 元数据Object方便处理对象的复合属性 xxObjec.xx.x
-   */
   protected final MetaObject metaObject;
 
   protected BaseWrapper(MetaObject metaObject) {

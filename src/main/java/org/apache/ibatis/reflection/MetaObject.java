@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * [Mybatis3源码分析(12)-Sql解析执行-MetaObject](https://blog.csdn.net/ashan_li/article/details/50375466)
  * [Mybatis——MetaObject学习](https://blog.csdn.net/u013769320/article/details/50492965)
  * 简介：MetaObject是Mybatis提供的一个用于方便、优雅访问对象属性的对象，通过它可以简化代码、不需要try/catch各种reflect异常，同时它支持对JavaBean、Collection、Map三种类型对象的操作
  * @author Clinton Begin
