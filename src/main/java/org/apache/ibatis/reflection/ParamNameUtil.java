@@ -46,4 +46,17 @@ public class ParamNameUtil {
   private ParamNameUtil() {
     super();
   }
+
+  /**
+   * [mybatis多个参数(不使用@param注解情况下)，sql参数占位符正确写法](https://my.oschina.net/u/3737136/blog/1811654)
+   * @param args
+   */
+  public static void main(String[] args) {
+
+    Method[] methods = ParamNameUtil.class.getMethods();
+    for (Method method : methods) {
+      ParamNameUtil.getParamNames(method);
+    }
+
+  }
 }

@@ -28,11 +28,21 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+/**
+ * <p>
+ *     [mybatis多个参数(不使用@param注解情况下)，sql参数占位符正确写法](https://my.oschina.net/u/3737136/blog/1811654)
+ *     [MyBatis处理多参数及原理分析](https://blog.csdn.net/codejas/article/details/79515635)
+ *     [Mybatis 源码分析之参数处理](https://blog.csdn.net/fcs_learner/article/details/79464651
+ *     )
+ *
+ * </p>
+ */
 public class ParamNameResolver {
 
   private static final String GENERIC_NAME_PREFIX = "param";
 
   /**
+   * 含有需要处理的参数的位置和当前是第几个参数？
    * <p>
    * The key is the index and the value is the name of the parameter.<br />
    * The name is obtained from {@link Param} if specified. When {@link Param} is not specified,
@@ -47,6 +57,9 @@ public class ParamNameResolver {
    */
   private final SortedMap<Integer, String> names;
 
+  /**
+   * 存在参数注解
+   */
   private boolean hasParamAnnotation;
 
   public ParamNameResolver(Configuration config, Method method) {
@@ -56,6 +69,7 @@ public class ParamNameResolver {
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
+      //排除特殊的参数
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
         continue;
@@ -71,6 +85,7 @@ public class ParamNameResolver {
       if (name == null) {
         // @Param was not specified.
         if (config.isUseActualParamName()) {
+          //arg0 arg1
           name = getActualParamName(method, paramIndex);
         }
         if (name == null) {
@@ -79,11 +94,18 @@ public class ParamNameResolver {
           name = String.valueOf(map.size());
         }
       }
+      //含有注解就是显示注解的名称
       map.put(paramIndex, name);
     }
     names = Collections.unmodifiableSortedMap(map);
   }
 
+  /**
+   * 是否为Java8的环境
+   * @param method
+   * @param paramIndex
+   * @return
+   */
   private String getActualParamName(Method method, int paramIndex) {
     if (Jdk.parameterExists) {
       return ParamNameUtil.getParamNames(method).get(paramIndex);
@@ -91,6 +113,11 @@ public class ParamNameResolver {
     return null;
   }
 
+  /**
+   * 特殊类型的参数注解
+   * @param clazz
+   * @return
+   */
   private static boolean isSpecialParameter(Class<?> clazz) {
     return RowBounds.class.isAssignableFrom(clazz) || ResultHandler.class.isAssignableFrom(clazz);
   }
@@ -113,15 +140,21 @@ public class ParamNameResolver {
   public Object getNamedParams(Object[] args) {
     final int paramCount = names.size();
     if (args == null || paramCount == 0) {
+      //没有参数
       return null;
     } else if (!hasParamAnnotation && paramCount == 1) {
       return args[names.firstKey()];
     } else {
+      //多个参数
       final Map<String, Object> param = new ParamMap<>();
       int i = 0;
       for (Map.Entry<Integer, String> entry : names.entrySet()) {
+        //参数的值为0 1 2 或者注解的value
         param.put(entry.getValue(), args[entry.getKey()]);
         // add generic param names (param1, param2, ...)
+
+        //添加点通用的名字，保证不被覆盖哦~~
+        // [mybatis多个参数(不使用@param注解情况下)，sql参数占位符正确写法](https://my.oschina.net/u/3737136/blog/1811654)
         final String genericParamName = GENERIC_NAME_PREFIX + String.valueOf(i + 1);
         // ensure not to overwrite parameter named with @Param
         if (!names.containsValue(genericParamName)) {
