@@ -558,27 +558,43 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * <mappers>
+       <mapper resource="org/apache/ibatis/builder/BlogMapper.xml"/>
+       <mapper url="file:./src/test/java/org/apache/ibatis/builder/NestedBlogMapper.xml"/>
+       <mapper class="org.apache.ibatis.builder.CachedAuthorMapper"/>
+       <package name="org.apache.ibatis.builder.mapper"/>
+   </mappers>
+   * 加载Mapper
+   * @param parent
+   * @throws Exception
+   */
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
         if ("package".equals(child.getName())) {
+          // <package name="org.apache.ibatis.builder.mapper"/>
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
         } else {
+          //加载单独的配置文件Mapper，非扫描包类型的
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
           if (resource != null && url == null && mapperClass == null) {
+            //<mapper resource="org/apache/ibatis/builder/BlogMapper.xml"/>
             ErrorContext.instance().resource(resource);
             InputStream inputStream = Resources.getResourceAsStream(resource);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
             mapperParser.parse();
           } else if (resource == null && url != null && mapperClass == null) {
+            // <mapper url="file:./src/test/java/org/apache/ibatis/builder/NestedBlogMapper.xml"/>
             ErrorContext.instance().resource(url);
             InputStream inputStream = Resources.getUrlAsStream(url);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
             mapperParser.parse();
           } else if (resource == null && url == null && mapperClass != null) {
+            //  <mapper class="org.apache.ibatis.builder.CachedAuthorMapper"/>
             Class<?> mapperInterface = Resources.classForName(mapperClass);
             configuration.addMapper(mapperInterface);
           } else {

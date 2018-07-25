@@ -261,6 +261,9 @@ public class Configuration {
    */
   protected Class<?> configurationFactory;
 
+  /**
+   * Mapper的注册工厂，一个接口类对应一个注册Mapper代理
+   */
   protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
 
   /**

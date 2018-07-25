@@ -298,8 +298,13 @@ public class MapperAnnotationBuilder {
   }
 
   void parseStatement(Method method) {
+    //获取参数类型，如果只有一个非特殊的参数类型就是当前这个，如果有多个就是Map啦
     Class<?> parameterTypeClass = getParameterType(method);
+
+    //获取当前动态语言的解析脚本类型
     LanguageDriver languageDriver = getLanguageDriver(method);
+
+    //可能当前方法没有特殊的注解~过掉！maybe写在啦 xml中
     SqlSource sqlSource = getSqlSourceFromAnnotations(method, parameterTypeClass, languageDriver);
     if (sqlSource != null) {
       Options options = method.getAnnotation(Options.class);
@@ -389,7 +394,13 @@ public class MapperAnnotationBuilder {
           options != null ? nullOrEmpty(options.resultSets()) : null);
     }
   }
-  
+
+  /**
+   * defaultScriptingLanguage	指定动态 SQL 生成的默认语言。	一个类型别名或完全限定类名。
+   * org.apache.ibatis.scripting.xmltags.XMLLanguageDriver
+   * @param method
+   * @return
+   */
   private LanguageDriver getLanguageDriver(Method method) {
     Lang lang = method.getAnnotation(Lang.class);
     Class<? extends LanguageDriver> langClass = null;
@@ -399,6 +410,14 @@ public class MapperAnnotationBuilder {
     return assistant.getLanguageDriver(langClass);
   }
 
+  /**
+   * 1、如果当前的参数没有{@link RowBounds} {@link ResultHandler}
+   * 2、如果只有一个参数，那么参数类型就是当前的参数
+   * 3、否则就是一个{@link ParamMap 继承Map的参数}
+   * 得到参数的类型
+   * @param method
+   * @return
+   */
   private Class<?> getParameterType(Method method) {
     Class<?> parameterType = null;
     Class<?>[] parameterTypes = method.getParameterTypes();
@@ -474,16 +493,23 @@ public class MapperAnnotationBuilder {
 
   private SqlSource getSqlSourceFromAnnotations(Method method, Class<?> parameterType, LanguageDriver languageDriver) {
     try {
+      //SQL 写在方法上的
       Class<? extends Annotation> sqlAnnotationType = getSqlAnnotationType(method);
+
+      //SQL由指定的方法实现的
       Class<? extends Annotation> sqlProviderAnnotationType = getSqlProviderAnnotationType(method);
       if (sqlAnnotationType != null) {
         if (sqlProviderAnnotationType != null) {
+          //两种情况都存在就异常啦
           throw new BindingException("You cannot supply both a static SQL and SqlProvider to method named " + method.getName());
         }
+
+        //方法上有注解类型
         Annotation sqlAnnotation = method.getAnnotation(sqlAnnotationType);
         final String[] strings = (String[]) sqlAnnotation.getClass().getMethod("value").invoke(sqlAnnotation);
         return buildSqlSourceFromStrings(strings, parameterType, languageDriver);
       } else if (sqlProviderAnnotationType != null) {
+        //有别的地方提供动态SQL
         Annotation sqlProviderAnnotation = method.getAnnotation(sqlProviderAnnotationType);
         return new ProviderSqlSource(assistant.getConfiguration(), sqlProviderAnnotation, type, method);
       }
@@ -493,6 +519,13 @@ public class MapperAnnotationBuilder {
     }
   }
 
+  /**
+   * 将注解上获取的String 拼接在一起，然后通过动态脚本解析器去解析语句
+   * @param strings
+   * @param parameterTypeClass
+   * @param languageDriver
+   * @return
+   */
   private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass, LanguageDriver languageDriver) {
     final StringBuilder sql = new StringBuilder();
     for (String fragment : strings) {
@@ -526,6 +559,11 @@ public class MapperAnnotationBuilder {
     return SqlCommandType.valueOf(type.getSimpleName().toUpperCase(Locale.ENGLISH));
   }
 
+  /**
+   * 获取当前SQL的处理类型是增删还是查改哦
+   * @param method
+   * @return
+   */
   private Class<? extends Annotation> getSqlAnnotationType(Method method) {
     return chooseAnnotationType(method, SQL_ANNOTATION_TYPES);
   }
@@ -534,6 +572,12 @@ public class MapperAnnotationBuilder {
     return chooseAnnotationType(method, SQL_PROVIDER_ANNOTATION_TYPES);
   }
 
+  /**
+   * 某个方法中找到注解
+   * @param method
+   * @param types
+   * @return
+   */
   private Class<? extends Annotation> chooseAnnotationType(Method method, Set<Class<? extends Annotation>> types) {
     for (Class<? extends Annotation> type : types) {
       Annotation annotation = method.getAnnotation(type);
