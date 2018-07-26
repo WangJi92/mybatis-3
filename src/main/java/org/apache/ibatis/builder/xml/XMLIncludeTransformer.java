@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * 讲解得蛮详细的，理解的比较深刻啊
+ * [Mybatis3.4.x技术内幕（十六）：Mybatis之sqlFragment（可复用的sql片段）](https://my.oschina.net/zudajun/blog/687326)
  * xml中 include 解析
  * @author Frank D. Martinez [mnesarco]
  */
@@ -53,9 +55,27 @@ public class XMLIncludeTransformer {
   }
 
   /**
+   * <sql id="someinclude">
+       <include refid="${include_target}"/>
+   </sql>
+
+   <select id="select" resultType="map">
+   <include refid="someinclude">
+       <property name="include_target" value="org.apache.ibatis.submitted.includes.fragments.select"/>
+   </include>
+   field1, field2, field3
+   from
+   <include refid="someinclude">
+       <property name="prefix" value="Some"/>
+       <property name="include_target" value="sometable"/>
+   </include>
+   </select>
+   *
+   *
+   * 通过递归地应用包括所有SQL
    * Recursively apply includes through all SQL fragments.
-   * @param source Include node in DOM tree
-   * @param variablesContext Current context for static variables with values
+   * @param source Include node in DOM tree 包括DOM树节点
+   * @param variablesContext Current context for static variables with values 当前上下文的静态变量值
    */
   private void applyIncludes(Node source, final Properties variablesContext, boolean included) {
     if (source.getNodeName().equals("include")) {
@@ -94,6 +114,7 @@ public class XMLIncludeTransformer {
     refid = PropertyParser.parse(refid, variables);
     refid = builderAssistant.applyCurrentNamespace(refid, true);
     try {
+      //找到SQL include
       XNode nodeToInclude = configuration.getSqlFragments().get(refid);
       return nodeToInclude.getNode().cloneNode(true);
     } catch (IllegalArgumentException e) {
@@ -106,6 +127,12 @@ public class XMLIncludeTransformer {
   }
 
   /**
+   *  <include refid="someinclude">
+       <property name="prefix" value="Some"/>
+       <property name="include_target" value="sometable"/>
+   </include>
+   *
+   * 从包括节点定义读取占位符和它们的值。
    * Read placeholders and their values from include node definition. 
    * @param node Include node instance
    * @param inheritedVariablesContext Current context used for replace variables in new variables values
