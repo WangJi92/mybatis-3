@@ -15,15 +15,6 @@
  */
 package org.apache.ibatis.session.defaults;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.exceptions.ExceptionFactory;
@@ -39,20 +30,43 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+
 /**
- *
+ * 默认SQLSession的实现类
  * The default implementation for {@link SqlSession}.
- * Note that this class is not Thread-Safe.
+ * Note that this class is not Thread-Safe. 请注意,这个类不是线程安全的
  *
  * @author Clinton Begin
  */
 public class DefaultSqlSession implements SqlSession {
 
+  /**
+   * 配置信息类
+   */
   private final Configuration configuration;
+
+  /**
+   * 执行器
+   */
   private final Executor executor;
 
+  /**
+   * 自动提交配置
+   */
   private final boolean autoCommit;
+
+  /**
+   * TODO what ?
+   */
   private boolean dirty;
+
+  /**
+   * 游标处理？
+   */
   private List<Cursor<?>> cursorList;
 
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
@@ -317,7 +331,13 @@ public class DefaultSqlSession implements SqlSession {
     return (!autoCommit && dirty) || force;
   }
 
+  /**
+   * 对于传递进来的参数进行包装，{@linkplain org.apache.ibatis.reflection.ParamNameResolver 这里在查询之前会对于参数进行简单耳朵包装}
+   * @param object
+   * @return
+   */
   private Object wrapCollection(final Object object) {
+    //如果当前参数是集合，这里也是为啥在xml语句中可以使用collection and list的原因 arry等等
     if (object instanceof Collection) {
       StrictMap<Object> map = new StrictMap<>();
       map.put("collection", object);

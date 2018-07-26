@@ -85,6 +85,11 @@ public class PreparedStatementHandler extends BaseStatementHandler {
     }
   }
 
+  /**
+   * 设置 预处理参数哦
+   * @param statement
+   * @throws SQLException
+   */
   @Override
   public void parameterize(Statement statement) throws SQLException {
     //创建了一个PrepareStatement对象，parameterize()则委托给ParameterHandler去设置。

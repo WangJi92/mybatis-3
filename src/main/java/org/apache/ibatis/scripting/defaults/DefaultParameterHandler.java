@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
+ * 处理参数预设值处理
  * <P>[Mybatis3.3.x技术内幕（六）：StatementHandler（Box stop here）](https://my.oschina.net/zudajun/blog/668378)
  *  看起来理解还是有点难度哦
  * </P>
@@ -82,7 +83,7 @@ public class DefaultParameterHandler implements ParameterHandler {
   public void setParameters(PreparedStatement ps) {
     ErrorContext.instance().activity("setting parameters").object(mappedStatement.getParameterMap().getId());
 
-    //获取参数哦
+    //获取参数哦，参数Mapping 是从SQL语句中获取的
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     if (parameterMappings != null) {
       for (int i = 0; i < parameterMappings.size(); i++) {
@@ -99,8 +100,10 @@ public class DefaultParameterHandler implements ParameterHandler {
           } else if (parameterObject == null) {
             value = null;
           } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+            //是否为基本数据类型 能够通过 typeHandler处理
             value = parameterObject;
           } else {
+            //这里是对象中的属性，获取对象中的属性的值的信息 user.name等等
             MetaObject metaObject = configuration.newMetaObject(parameterObject);
             value = metaObject.getValue(propertyName);
           }

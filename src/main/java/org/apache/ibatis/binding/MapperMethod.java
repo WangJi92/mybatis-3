@@ -62,7 +62,10 @@ public class MapperMethod {
    * @param config   配置信息哦
    */
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
+    //处理SQL命令的类型和唯一标识信息
     this.command = new SqlCommand(config, mapperInterface, method);
+
+    //解析方法中的一些特殊的标识
     this.method = new MethodSignature(config, mapperInterface, method);
   }
 
