@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * [Mybatis3.4.x技术内幕（二十一）：参数设置、结果封装、级联查询、延迟加载原理分析](https://my.oschina.net/zudajun/blog/747283)
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Iwao AVE!
