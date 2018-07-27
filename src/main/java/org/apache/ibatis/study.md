@@ -11,3 +11,4 @@
 [MyBatis ofType和javaType区别](https://blog.csdn.net/u013216156/article/details/78642920/)
 [动态 SQL 中的可插拔脚本语言](http://www.mybatis.org/mybatis-3/zh/dynamic-sql.html)
 [Java 7 新的 try-with-resources 语句，自动资源释放](https://www.oschina.net/question/12_10706)
+[Mybatis3.4.x技术内幕（二十一）：参数设置、结果封装、级联查询、延迟加载原理分析](https://my.oschina.net/zudajun/blog/747283)
