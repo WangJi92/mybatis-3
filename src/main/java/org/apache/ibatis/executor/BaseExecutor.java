@@ -265,7 +265,15 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Cannot commit, transaction is already closed");
     }
+    //清除掉一级缓存信息
     clearLocalCache();
+
+    /**
+     * ReuseExecutor就是依赖Map<String, Statement>来完成对Statement的重用的（用完不关）。
+     总不能一直不关吧？到底什么时候关闭这些Statement对象的？问的非常好。
+     方法flushStatements()就是用来处理这些Statement对象的。
+     在执行commit、rollback等动作前，将会执行flushStatements()方法，将Statement对象逐一关闭。
+     */
     flushStatements();
     if (required) {
       transaction.commit();
@@ -276,7 +284,15 @@ public abstract class BaseExecutor implements Executor {
   public void rollback(boolean required) throws SQLException {
     if (!closed) {
       try {
+        //清除掉一级缓存信息
         clearLocalCache();
+
+        /**
+         * ReuseExecutor就是依赖Map<String, Statement>来完成对Statement的重用的（用完不关）。
+         总不能一直不关吧？到底什么时候关闭这些Statement对象的？问的非常好。
+         方法flushStatements()就是用来处理这些Statement对象的。
+         在执行commit、rollback等动作前，将会执行flushStatements()方法，将Statement对象逐一关闭。
+         */
         flushStatements(true);
       } finally {
         if (required) {
@@ -317,6 +333,10 @@ public abstract class BaseExecutor implements Executor {
   protected abstract <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql)
       throws SQLException;
 
+  /**
+   * 关闭掉StatMent
+   * @param statement
+   */
   protected void closeStatement(Statement statement) {
     if (statement != null) {
       try {
@@ -330,6 +350,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   /**
+   * 设置一个事务超时
    * Apply a transaction timeout.
    * @param statement a current statement
    * @throws SQLException if a database access error occurs, this method is called on a closed <code>Statement</code>
