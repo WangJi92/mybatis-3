@@ -34,11 +34,21 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
+ * [Mybatis3.3.x技术内幕（六）：StatementHandler（Box stop here）](https://my.oschina.net/zudajun/blog/668378)
+ * 对于BaseStatementHandler，完成了Sql相关信息的保存工作，也就是把通用食材准备好了。我们重点关注上面的抽象方法即可
+ * ，也就是创建什么样的Statement对象，具体由子类去实现，子类相当于厨师，面对相同的食材，厨师对其烹饪的手法略有不同。
  * @author Clinton Begin
  */
 public abstract class BaseStatementHandler implements StatementHandler {
 
+  /**
+   * 核心配置文件信息处理~
+   */
   protected final Configuration configuration;
+
+  /**
+   * 反射神器
+   */
   protected final ObjectFactory objectFactory;
   /**
    * 类型转换注册仓库
@@ -46,12 +56,12 @@ public abstract class BaseStatementHandler implements StatementHandler {
   protected final TypeHandlerRegistry typeHandlerRegistry;
 
   /**
-   * ResultSetHandler
+   * ResultSetHandler  结果集处理
    */
   protected final ResultSetHandler resultSetHandler;
 
   /**
-   * ParameterHandler
+   * ParameterHandler  参数处理
    */
   protected final ParameterHandler parameterHandler;
 
@@ -82,6 +92,10 @@ public abstract class BaseStatementHandler implements StatementHandler {
     this.rowBounds = rowBounds;
 
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+
+    /**
+     * 反射处理神器
+     */
     this.objectFactory = configuration.getObjectFactory();
 
     if (boundSql == null) { // issue #435, get the key before calculating the statement 计算之前的关键语句
