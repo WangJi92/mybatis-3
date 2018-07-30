@@ -18,12 +18,24 @@ package org.apache.ibatis.executor.result;
 import org.apache.ibatis.session.ResultContext;
 
 /**
+ * {@linkplain org.apache.ibatis.session.defaults.DefaultSqlSession#selectMap(String, Object, String) 这里进行处理，针对每一行的数据行为进行啦处理}
  * @author Clinton Begin
  */
 public class DefaultResultContext<T> implements ResultContext<T> {
 
+  /**
+   * 当前处理返回结果的对象信息
+   */
   private T resultObject;
+
+  /**
+   * 当前是第几个哦
+   */
   private int resultCount;
+
+  /**
+   * 是否停止 执行完成啦？
+   */
   private boolean stopped;
 
   public DefaultResultContext() {

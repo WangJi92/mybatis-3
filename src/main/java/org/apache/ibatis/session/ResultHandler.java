@@ -21,6 +21,11 @@ package org.apache.ibatis.session;
  */
 public interface ResultHandler<T> {
 
+  /**
+   * ResultContext MayBe  是当前数据中的一项，通过对于每一个数据项进行转换获取到最终需要的数据的类型信息
+   * {@linkplain org.apache.ibatis.session.defaults.DefaultSqlSession#selectMap(String, Object, String) 使用看这里哦}
+   * @param resultContext
+   */
   void handleResult(ResultContext<? extends T> resultContext);
 
 }

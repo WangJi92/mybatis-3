@@ -15,14 +15,17 @@
  */
 package org.apache.ibatis.executor.result;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
+ * [mybatis 中的 ResultHandler（传入map返回map）](https://www.cnblogs.com/LiuPan2016/p/8391753.html) 可以根据自己的需求定义返回值的信息
+ * 默认的结果处理器，这里只是将返回的List想你想添加起来哦
+ * {@linkplain org.apache.ibatis.session.defaults.DefaultSqlSession#selectMap(String, Object, String) 这里有使用到返回为Map的情况}
  * @author Clinton Begin
  */
 public class DefaultResultHandler implements ResultHandler<Object> {
@@ -35,11 +38,13 @@ public class DefaultResultHandler implements ResultHandler<Object> {
 
   @SuppressWarnings("unchecked")
   public DefaultResultHandler(ObjectFactory objectFactory) {
+    //穿创建一个数据List信息对象哦~
     list = objectFactory.create(List.class);
   }
 
   @Override
   public void handleResult(ResultContext<? extends Object> context) {
+    //然后遍历每一项的数据信息，然后进行数据的处理哦
     list.add(context.getResultObject());
   }
 

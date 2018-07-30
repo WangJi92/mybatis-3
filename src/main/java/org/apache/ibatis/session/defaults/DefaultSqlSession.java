@@ -60,12 +60,12 @@ public class DefaultSqlSession implements SqlSession {
   private final boolean autoCommit;
 
   /**
-   * TODO what ?
+   * TODO 是否为脏数据哦
    */
   private boolean dirty;
 
   /**
-   * 游标处理？
+   * 游标处理？方便关闭所有的游标信息
    */
   private List<Cursor<?>> cursorList;
 
@@ -88,6 +88,7 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <T> T selectOne(String statement, Object parameter) {
     // Popular vote was to return null on 0 results and throw exception on too many.
+    // 如果存在太多的结果将会抛出异常的哦
     List<T> list = this.<T>selectList(statement, parameter);
     if (list.size() == 1) {
       return list.get(0);
@@ -108,16 +109,37 @@ public class DefaultSqlSession implements SqlSession {
     return this.selectMap(statement, parameter, mapKey, RowBounds.DEFAULT);
   }
 
+  /**
+   *
+   * @param statement Unique identifier matching the statement to use.  用来获取当前SQL的描述信息的MappedStatement哦
+   * @param parameter A parameter object to pass to the statement. 当前实际传递的参数的信息哦
+   * @param mapKey The property to use as key for each value in the list. 作为列表中的某个值的键
+   * @param rowBounds  Bounds to limit object retrieval  分页参数
+   * @param <K>
+   * @param <V>
+   * @return
+   */
   @Override
   public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
+    // 得到处理返回的结果的信息哦~~
     final List<? extends V> list = selectList(statement, parameter, rowBounds);
+
+    //处理Map类型的转换器Map<id,Author> 类似这种样子的数据
+
+    //获取到Configuration 中提供的反射基本工具类哦
     final DefaultMapResultHandler<K, V> mapResultHandler = new DefaultMapResultHandler<>(mapKey,
             configuration.getObjectFactory(), configuration.getObjectWrapperFactory(), configuration.getReflectorFactory());
+
+    //当前项数据的信息，方便便利整个List数据进行处理
     final DefaultResultContext<V> context = new DefaultResultContext<>();
     for (V o : list) {
+      //执行便利，将每一项数据信息进行处理哦
       context.nextResultObject(o);
+
+      //设置啦，当前的项，然后通过工具类方便获取数据，进行返回结果的处理哦
       mapResultHandler.handleResult(context);
     }
+    //获取返回的结果信息
     return mapResultHandler.getMappedResults();
   }
 
@@ -134,6 +156,7 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <T> Cursor<T> selectCursor(String statement, Object parameter, RowBounds rowBounds) {
     try {
+      //与Select 类似的处理逻辑
       MappedStatement ms = configuration.getMappedStatement(statement);
       Cursor<T> cursor = executor.queryCursor(ms, wrapCollection(parameter), rowBounds);
       registerCursor(cursor);
@@ -145,6 +168,12 @@ public class DefaultSqlSession implements SqlSession {
     }
   }
 
+  /**
+   * 不带参数的处理的情况
+   * @param statement Unique identifier matching the statement to use.
+   * @param <E>
+   * @return
+   */
   @Override
   public <E> List<E> selectList(String statement) {
     return this.selectList(statement, null);
@@ -158,7 +187,13 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
+      //获取当前的SQL描述信息
       MappedStatement ms = configuration.getMappedStatement(statement);
+
+      /**
+       * 1、对于数据进行包装，添加一些 collection、array、list等等，处理数据的时候或多或少的有关使用这种类型的变量信息
+       * 2、转交给执行器去处理，获取返回的结果
+       */
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
@@ -283,6 +318,9 @@ public class DefaultSqlSession implements SqlSession {
     }
   }
 
+  /**
+   * 关闭掉所有的游标信息
+   */
   private void closeCursors() {
     if (cursorList != null && cursorList.size() != 0) {
       for (Cursor<?> cursor : cursorList) {
@@ -315,6 +353,9 @@ public class DefaultSqlSession implements SqlSession {
     }
   }
 
+  /**
+   * 执行器清理一级缓存信息
+   */
   @Override
   public void clearCache() {
     executor.clearLocalCache();
@@ -353,6 +394,10 @@ public class DefaultSqlSession implements SqlSession {
     return object;
   }
 
+  /**
+   * 严格的，不能出现重复的key值
+   * @param <V>
+   */
   public static class StrictMap<V> extends HashMap<String, V> {
 
     private static final long serialVersionUID = -5741767162221585340L;
