@@ -15,9 +15,6 @@
  */
 package org.apache.ibatis.executor.keygen;
 
-import java.sql.Statement;
-import java.util.List;
-
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -25,6 +22,9 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.RowBounds;
+
+import java.sql.Statement;
+import java.util.List;
 
 /**
  * @author Clinton Begin
@@ -55,6 +55,27 @@ public class SelectKeyGenerator implements KeyGenerator {
     }
   }
 
+  /**
+   *
+   <insert id="insertStudent" parameterType="Student" >
+       <selectKey keyProperty="studId" resultType="int" order="BEFORE">
+       SELECT ELEARNING.STUD_ID_SEQ.NEXTVAL FROM DUAL
+       </selectKey>
+       INSERT INTO
+       STUDENTS(STUD_ID, NAME, EMAIL, DOB, PHONE)
+       VALUES(#{studId}, #{name},
+       #{email}, #{dob}, #{phone})
+   </insert>
+
+   在执行insert之前，先发起一个sql查询，将返回的序列值赋值给Student的stuId属性，然后再执行insert操作，这样表中的stud_id字段就有值了。
+   order="BEFORE"表示insert前执行，比如取sequence序列值；order="AFTER"表示insert之后执行，比如使用触发器给主键stud_id赋值。比较简单，我就不再贴源码了。
+   注意：由于selectKey本身返回单个序列主键值，也就无法支持批量insert操作并返回主键id列表了。如果要执行批量insert，请选择使用for循环执行多次插入操作。
+
+
+   * @param executor
+   * @param ms
+   * @param parameter
+   */
   private void processGeneratedKeys(Executor executor, MappedStatement ms, Object parameter) {
     try {
       if (parameter != null && keyStatement != null && keyStatement.getKeyProperties() != null) {
@@ -81,6 +102,7 @@ public class SelectKeyGenerator implements KeyGenerator {
                 setValue(metaParam, keyProperties[0], values.get(0));
               }
             } else {
+              //处理多个值的情况哦
               handleMultipleProperties(keyProperties, metaParam, metaResult);
             }
           }

@@ -15,16 +15,6 @@
  */
 package org.apache.ibatis.executor.keygen;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -34,7 +24,15 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+
 /**
+ * [Mybatis3.3.x技术内幕（十四）：Mybatis之KeyGenerator ](https://my.oschina.net/zudajun/blog/673612)
+ * [MyBatis主键生成器KeyGenerator（一）](https://blog.csdn.net/qq924862077/article/details/52673430)
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -56,9 +54,16 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     processBatch(ms, stmt, getParameters(parameter));
   }
 
+  /**
+   * <insert id="insertStudents" useGeneratedKeys="true" keyProperty="studId" parameterType="Student">
+   * @param ms
+   * @param stmt
+   * @param parameters
+   */
   public void processBatch(MappedStatement ms, Statement stmt, Collection<Object> parameters) {
     ResultSet rs = null;
     try {
+      //// 获得返回的主键值结果集
       rs = stmt.getGeneratedKeys();
       final Configuration configuration = ms.getConfiguration();
       final TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
@@ -66,15 +71,18 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
       final ResultSetMetaData rsmd = rs.getMetaData();
       TypeHandler<?>[] typeHandlers = null;
       if (keyProperties != null && rsmd.getColumnCount() >= keyProperties.length) {
+        // // 给参数object对象的属性赋主键值（批量插入，可能是多个)
         for (Object parameter : parameters) {
           // there should be one row for each statement (also one for each parameter)
           if (!rs.next()) {
             break;
           }
+
           final MetaObject metaParam = configuration.newMetaObject(parameter);
           if (typeHandlers == null) {
             typeHandlers = getTypeHandlers(typeHandlerRegistry, metaParam, keyProperties, rsmd);
           }
+          //赋值
           populateKeys(rs, metaParam, keyProperties, typeHandlers);
         }
       }
@@ -132,6 +140,8 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
       TypeHandler<?> th = typeHandlers[i];
       if (th != null) {
         Object value = th.getResult(rs, i + 1);
+
+        //主键字段，可能是多个（一般情况下，是一个）
         metaParam.setValue(property, value);
       }
     }
